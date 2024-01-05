@@ -61,7 +61,7 @@
         "test_original_file_quelevel": "test_quelevel.csv"
     },
     "assist2009": {
-        "dpath": "/home/toan/d/Azota/pytorchKT-2/dataset/ASSISTments2009",
+        "dpath": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2009",
         "num_q": 17737,
         "num_c": 123,
         "input_type": [

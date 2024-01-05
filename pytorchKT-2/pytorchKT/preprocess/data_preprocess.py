@@ -4,10 +4,10 @@ from split_datasets import split_concept
 from split_datasets_que import split_question
 
 dname2paths = {
-    "assist2009": "/home/toan/d/Azota/pytorchKT-2/dataset/ASSISTments2009/skill_builder_data_corrected_collapsed.csv",
-    "assist2015": "/home/toan/d/Azota/pytorchKT-2/dataset/ASSISTments2015/2015_100_skill_builders_main_problems.csv",
+    "assist2009": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2009/skill_builder_data_corrected_collapsed.csv",
+    "assist2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2015/2015_100_skill_builders_main_problems.csv",
 }
-configf = "/home/toan/d/Azota/pytorchKT-2/pytorchKT/configs/data_config.json"
+config = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/pytorchKT/configs/data_config.json"
 
 
 def process_raw_data(dataset_name, dname2paths):
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         dname,
         writef,
         args.dataset_name,
-        configf,
+        config,
         args.min_seq_len,
         args.maxlen,
         args.kfold,
