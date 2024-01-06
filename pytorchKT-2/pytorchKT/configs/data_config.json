@@ -1,24 +1,16 @@
 {
     "assist2015": {
-        "dpath": "/home/toan/d/Azota/pytorchKT-2/dataset/ASSISTments2015",
+        "dpath": "pytorchKT-2/dataset/ASSISTments2015/",
         "num_q": 0,
         "num_c": 100,
-        "input_type": [
-            "concepts"
-        ],
+        "input_type": ["concepts"],
         "max_concepts": 1,
         "min_seq_len": 3,
-        "maxlen": 200,
+        "maxlen": 70,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -32,23 +24,14 @@
         "dpath": "../data/algebra2005",
         "num_q": 173113,
         "num_c": 112,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 7,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -61,26 +44,17 @@
         "test_original_file_quelevel": "test_quelevel.csv"
     },
     "assist2009": {
-        "dpath": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2009",
+        "dpath": "pytorchKT-2/dataset/ASSISTments2009/",
         "num_q": 17737,
         "num_c": 123,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 4,
         "min_seq_len": 3,
-        "maxlen": 200,
+        "maxlen": 70,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -96,20 +70,11 @@
         "dpath": "../data/slepemapy",
         "num_q": 2913,
         "num_c": 1458,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -120,22 +85,13 @@
         "dpath": "../data/assist2017",
         "num_q": 3162,
         "num_c": 102,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "min_seq_len": 3,
         "maxlen": 500,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -146,20 +102,11 @@
         "dpath": "../data/assist2012",
         "num_q": 53070,
         "num_c": 265,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -170,22 +117,14 @@
         "dpath": "../data/statics2011",
         "num_q": 0,
         "num_c": 1223,
-        "input_type": [
-            "concepts"
-        ],
+        "input_type": ["concepts"],
         "max_concepts": 1,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -199,23 +138,14 @@
         "dpath": "../data/junyi2015",
         "num_q": 721,
         "num_c": 39,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 1,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -226,23 +156,14 @@
         "dpath": "../data/bridge2algebra2006",
         "num_q": 129263,
         "num_c": 493,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 5,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -258,23 +179,14 @@
         "dpath": "../data/ednet",
         "num_q": 11901,
         "num_c": 188,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 7,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -290,23 +202,14 @@
         "dpath": "../data/nips_task34",
         "num_q": 948,
         "num_c": 57,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 2,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -322,22 +225,14 @@
         "dpath": "../data/poj",
         "num_q": 0,
         "num_c": 2748,
-        "input_type": [
-            "concepts"
-        ],
+        "input_type": ["concepts"],
         "max_concepts": 1,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",
@@ -351,22 +246,13 @@
         "dpath": "../data/peiyou",
         "num_q": 7652,
         "num_c": 865,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 6,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "train_valid_original_file": "train_valid.csv",
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
@@ -383,23 +269,14 @@
         "dpath": "../data/ednet5w",
         "num_q": 12235,
         "num_c": 188,
-        "input_type": [
-            "questions",
-            "concepts"
-        ],
+        "input_type": ["questions", "concepts"],
         "max_concepts": 7,
         "min_seq_len": 3,
         "maxlen": 200,
         "emb_path": "",
         "train_valid_original_file": "train_valid.csv",
         "train_valid_file": "train_valid_sequences.csv",
-        "folds": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "folds": [0, 1, 2, 3, 4],
         "test_original_file": "test.csv",
         "test_file": "test_sequences.csv",
         "test_window_file": "test_window_sequences.csv",

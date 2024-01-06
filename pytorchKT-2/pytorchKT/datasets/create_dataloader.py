@@ -1,7 +1,7 @@
 import os
 from torch.utils.data import DataLoader
 import numpy as np
-from data_loader import KTDataset
+from pytorchKT.datasets.create_dataset import KTDataset
 
 
 def init_dataset4train(
@@ -14,12 +14,12 @@ def init_dataset4train(
     curvalid = KTDataset(
         os.path.join(data_config["dpath"], data_config["train_valid_file"]),
         data_config["input_type"],
-        i,
+        {i},
     )
     curtrain = KTDataset(
         os.path.join(data_config["dpath"], data_config["train_valid_file"]),
         data_config["input_type"],
-        all_folds - i,
+        all_folds - {i},
     )
 
     train_dataloader = DataLoader(curtrain, batch_size=batch_size)

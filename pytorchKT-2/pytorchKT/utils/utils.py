@@ -2,7 +2,18 @@ import os, sys
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-from pytorchKT.datasets.data_loader import KTDataset
+import datetime
+
+
+def get_now_time():
+    """Return the time string, the format is %Y-%m-%d %H:%M:%S
+
+    Returns:
+        str: now time
+    """
+    now = datetime.datetime.now()
+    dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+    return dt_string
 
 
 def debug_print(text, fuc_name=""):

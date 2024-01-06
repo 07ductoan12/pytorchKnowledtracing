@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# coding=utf-8
-
 import os, sys
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-# if torch.cuda.is_available():
-#     from torch.cuda import FloatTensor, LongTensor
-# else:
-# from torch import FloatTensor, LongTensor
 import numpy as np
 
 if torch.cuda.is_available():

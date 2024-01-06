@@ -9,10 +9,11 @@ device = "cpu" if not torch.cuda.is_available() else "cuda"
 def init_model(model_name, model_config, data_config, emb_type):
     if model_name == "dkt":
         model = DKT(
-            data_config["numc"],
-            **model_config,
+            data_config["num_c"],
+            emb_size=model_config["emb_size"],
+            dropout=model_config["dropout"],
             emb_type=emb_type,
-            emb_path=data_config["emb_path"]
+            emb_path=data_config["emb_path"],
         ).to(device)
     else:
         print("The wrong model name was used...")
