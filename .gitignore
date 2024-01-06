@@ -1,3 +1,10 @@
 pytorchKT-2/dataset
 pytorchKT/datasets
 KnowledgeTracing/datasets
+KnowledgeTracing/KnowledgeTracing/__pycache__
+KnowledgeTracing/KnowledgeTracing/models/__pycache__
+KnowledgeTracing/KnowledgeTracing/data_loaders/__pycache__
+pytorchKT/pytorchKT/__pycache__
+pytorchKT/pytorchKT/models/__pycache__
+pytorchKT/pytorchKT/preprocess/__pycache__
+pytorchKT-2/pytorchKT/preprocess/__pycache__
