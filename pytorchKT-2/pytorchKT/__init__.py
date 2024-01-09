@@ -1,3 +1,4 @@
 from .train import train
+from .eval import eval
 
-__all__ = ["train"]
+__all__ = ["train", "eval"]

@@ -1,6 +1,6 @@
 {
     "assist2015": {
-        "dpath": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2015",
+        "dpath": "./datasets/ASSISTments2015",
         "num_q": 0,
         "num_c": 100,
         "input_type": [
@@ -61,7 +61,7 @@
         "test_original_file_quelevel": "test_quelevel.csv"
     },
     "assist2009": {
-        "dpath": "pytorchKT-2/dataset/ASSISTments2009/",
+        "dpath": "./datasets/ASSISTments2009/",
         "num_q": 17737,
         "num_c": 123,
         "input_type": [
@@ -196,7 +196,7 @@
         "test_original_file_quelevel": "test_quelevel.csv"
     },
     "junyi2015": {
-        "dpath": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/Junyi",
+        "dpath": "./datasets/Junyi",
         "num_q": 703,
         "num_c": 39,
         "input_type": [
@@ -260,8 +260,8 @@
         "test_original_file_quelevel": "test_quelevel.csv"
     },
     "ednet": {
-        "dpath": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/EdNet",
-        "num_q": 11901,
+        "dpath": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets",
+        "num_q": 12069,
         "num_c": 188,
         "input_type": [
             "questions",

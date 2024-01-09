@@ -22,6 +22,7 @@ def read_data_from_csv(read_file, write_file, dataset_name=None):
     random.shuffle(samp)
 
     count = 0
+    start_i = None
 
     for unum in tqdm(samp):
         str_unum = str(unum)
@@ -33,7 +34,7 @@ def read_data_from_csv(read_file, write_file, dataset_name=None):
             file_list.append(df)
             count = count + 1
 
-        if dataset_name == "ednet" and count == 5000:
+        if dataset_name == "ednet" and count == 7500:
             start_i = 0
             break
         elif dataset_name == "ednet5w" and count == 50000 + 5000:

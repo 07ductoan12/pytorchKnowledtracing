@@ -4,9 +4,9 @@ from split_datasets import split_concept
 from split_datasets_que import split_question
 
 dname2paths = {
-    "assist2009": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2009/skill_builder_data_corrected_collapsed.csv",
-    "assist2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2015/2015_100_skill_builders_main_problems.csv",
-    "ednet": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/EdNet/",
+    "assist2009": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/ASSISTments2009/skill_builder_data_corrected_collapsed.csv",
+    "assist2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/ASSISTments2015/2015_100_skill_builders_main_problems.csv",
+    "ednet": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/EdNet",
     "junyi2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/Junyi/junyi_ProblemLog_original.csv",
 }
 config = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/pytorchKT/configs/data_config.json"
@@ -42,7 +42,7 @@ def process_raw_data(dataset_name, dname2paths):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dataset_name", type=str, default="junyi2015")
+    parser.add_argument("-d", "--dataset_name", type=str, default="ednet")
     parser.add_argument("-m", "--min_seq_len", type=int, default=3)
     parser.add_argument("-l", "--maxlen", type=int, default=200)
     parser.add_argument("-k", "--kfold", type=int, default=5)

@@ -1,4 +1,4 @@
-import os
+import os, sys
 import argparse
 import json
 
@@ -7,10 +7,11 @@ import torch
 torch.set_num_threads(4)
 from torch.optim import SGD, Adam
 import copy
-from pytorchKT.models import train_model, evaluate, init_model
+from pytorchKT.models import train_model, init_model
 from pytorchKT.datasets.create_dataloader import init_dataset4train
 from pytorchKT.utils import debug_print
 import datetime
+from pytorchKT.arguments import get_train_argments
 
 device = "cpu" if not torch.cuda.is_available() else "cuda"
 
@@ -27,7 +28,9 @@ def save_config(train_config, model_config, data_config, params, save_dir):
         json.dump(d, fout)
 
 
-def train(params):
+def train():
+    params = vars(get_train_argments())
+
     model_name, dataset_name, fold, emb_type, save_dir = (
         params["model_name"],
         params["dataset_name"],
@@ -42,28 +45,8 @@ def train(params):
         config = json.load(f)
         train_config = config["train_config"]
         keys = config[model_name].keys()
-        if model_name in [
-            "dkvmn",
-            "deep_irt",
-            "sakt",
-            "saint",
-            "saint++",
-            "akt",
-            "atkt",
-            "lpkt",
-            "skvmn",
-            "dimkt",
-        ]:
+        if model_name in ["sakt"]:
             train_config["batch_size"] = 64  ## because of OOM
-        if model_name in ["simplekt", "bakt_time", "sparsekt"]:
-            train_config["batch_size"] = 64  ## because of OOM
-        if model_name in ["gkt"]:
-            train_config["batch_size"] = 16
-        if model_name in ["qdkt", "qikt"] and dataset_name in [
-            "algebra2005",
-            "bridge2algebra2006",
-        ]:
-            train_config["batch_size"] = 32
         model_config = copy.deepcopy(params)
 
         for key in keys:
@@ -191,5 +174,10 @@ def train(params):
         + "\t"
         + str(best_epoch)
     )
-    model_save_path = os.path.join(ckpt_path, emb_type + "_model.ckpt")
     print(f"end:{datetime.datetime.now()}")
+
+
+if __name__ == "__main__":
+    if sys.argv[1] == "train":
+        print("Start TRAIN process...\n")
+        train()
