@@ -1,4 +1,4 @@
-pytorchKT-2/dataset
+pytorchKT-2/datasets
 pytorchKT/datasets
 KnowledgeTracing/datasets
 KnowledgeTracing/KnowledgeTracing/__pycache__
@@ -13,3 +13,4 @@ pytorchKT-2/pytorchKT/datasets/__pycache__
 pytorchKT-2/pytorchKT/__pycache__
 pytorchKT-2/pytorchKT/utils/__pycache__
 pytorchKT-2/pytorchKT/__pycache__
+pytorchKT-2/saved_model

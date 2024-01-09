@@ -38,9 +38,10 @@ def train(params):
 
     debug_print(text="load config files.", fuc_name="main")
 
-    with open("./pytorchKT-2/pytorchKT/configs/kt_config.json") as f:
+    with open("./pytorchKT/configs/kt_config.json") as f:
         config = json.load(f)
         train_config = config["train_config"]
+        keys = config[model_name].keys()
         if model_name in [
             "dkvmn",
             "deep_irt",
@@ -64,6 +65,11 @@ def train(params):
         ]:
             train_config["batch_size"] = 32
         model_config = copy.deepcopy(params)
+
+        for key in keys:
+            if not key in model_config.keys():
+                model_config[key] = config[model_name][key]
+
         for key in [
             "model_name",
             "dataset_name",
@@ -84,7 +90,7 @@ def train(params):
         train_config["optimizer"],
     )
 
-    with open("./pytorchKT-2/pytorchKT/configs/data_config.json") as fin:
+    with open("./pytorchKT/configs/data_config.json") as fin:
         data_config = json.load(fin)
 
     if "maxlen" in data_config[dataset_name]:  # prefer to use the maxlen in data config
@@ -115,6 +121,9 @@ def train(params):
     print(f"train_config: {train_config}")
 
     learning_rate = params["learning_rate"]
+
+    if model_name in ["sakt"]:
+        model_config["seq_len"] = seq_len
 
     debug_print(text="init_model", fuc_name="main")
     print(f"model_name:{model_name}")

@@ -7,6 +7,7 @@ dname2paths = {
     "assist2009": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2009/skill_builder_data_corrected_collapsed.csv",
     "assist2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/ASSISTments2015/2015_100_skill_builders_main_problems.csv",
     "ednet": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/dataset/EdNet/",
+    "junyi2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/Junyi/junyi_ProblemLog_original.csv",
 }
 config = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/pytorchKT/configs/data_config.json"
 
@@ -22,10 +23,17 @@ def process_raw_data(dataset_name, dname2paths):
         from assist2015_preprocess import read_data_from_csv
     elif dataset_name in ["ednet", "ednet5w"]:
         from ednet_preprocess import read_data_from_csv
+    elif dataset_name == "junyi2015":
+        from junyi2015_preprocess import read_data_from_csv, load_q2c
 
     # metap = os.path.join(dname, "metadata")
     if dataset_name in ["ednet", "ednet5w"]:
         read_data_from_csv(readf, writef, dataset_name=dataset_name)
+    elif dataset_name == "junyi2015":
+        dq2c = load_q2c(
+            readf.replace("junyi_ProblemLog_original.csv", "junyi_Exercise_table.csv")
+        )
+        read_data_from_csv(readf, writef, dq2c)
     else:
         read_data_from_csv(readf, writef)
 
@@ -34,9 +42,9 @@ def process_raw_data(dataset_name, dname2paths):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dataset_name", type=str, default="ednet")
+    parser.add_argument("-d", "--dataset_name", type=str, default="junyi2015")
     parser.add_argument("-m", "--min_seq_len", type=int, default=3)
-    parser.add_argument("-l", "--maxlen", type=int, default=70)
+    parser.add_argument("-l", "--maxlen", type=int, default=200)
     parser.add_argument("-k", "--kfold", type=int, default=5)
     # parser.add_argument("--mode", type=str, default="concept",help="question or concept")
     args = parser.parse_args()

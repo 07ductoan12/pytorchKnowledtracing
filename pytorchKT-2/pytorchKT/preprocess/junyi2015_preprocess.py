@@ -1,5 +1,5 @@
 import pandas as pd
-from .utils import sta_infos, write_txt, replace_text
+from utils import sta_infos, write_txt, replace_text
 
 
 def load_q2c(qname):
@@ -91,6 +91,8 @@ def read_data_from_csv(read_file, write_file, dq2c):
         data.append([uc, questions, concepts, rs, ts, uts])
         if len(data) % 1000 == 0:
             print(len(data))
+        if len(data) == 5000:
+            break
     write_txt(write_file, data)
 
     print("\n".join(stares))

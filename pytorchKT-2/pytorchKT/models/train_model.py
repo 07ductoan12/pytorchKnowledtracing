@@ -20,6 +20,10 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
         t = torch.masked_select(rshft, sm)
 
         loss = binary_cross_entropy(y.double(), t.double())
+    elif model_name in ["sakt"]:
+        y = torch.masked_select(ys[0], sm)
+        t = torch.masked_select(rshft, sm)
+        loss = binary_cross_entropy(y.double(), t.double())
 
     return loss
 
@@ -48,6 +52,9 @@ def model_forward(model: nn.Module, data, rel=None):
     if model_name in ["dkt"]:
         y = model(c.long(), r.long())
         y = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
+        ys.append(y)
+    elif model_name in ["sakt"]:
+        y = model(c.long(), r.long(), cshft.long())
         ys.append(y)
 
     loss = cal_loss(model, ys, r, rshft, sm, preloss)
