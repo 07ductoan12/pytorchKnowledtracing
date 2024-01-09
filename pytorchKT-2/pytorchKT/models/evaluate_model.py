@@ -5,6 +5,9 @@ from torch.nn.functional import one_hot
 from sklearn import metrics
 import pandas as pd
 import csv
+import copy
+
+que_type_models = []
 
 device = "cpu" if not torch.cuda.is_available() else "cuda"
 
@@ -149,30 +152,52 @@ def save_currow_question_res(idx, dcres, dqres, qidxs, ctrues, cpreds, uid, fout
             )
             + "\n"
         )
+    fout.write("\n")
 
 
 def evaluate(model, test_loader, model_name, rel=None, save_path=""):
     if save_path != "":
         fout = open(save_path, "w", encoding="utf8")
-
     with torch.no_grad():
         y_trues = []
         y_scores = []
         dres = dict()
         test_mini_index = 0
-
         for data in test_loader:
+            # if model_name in ["dkt_forget", "lpkt"]:
+            #     q, c, r, qshft, cshft, rshft, m, sm, d, dshft = data
             if model_name in ["dkt_forget", "bakt_time"]:
                 dcur, dgaps = data
             else:
                 dcur = data
-            q, c, r = dcur["qseqs"], dcur["cseqs"], dcur["rseqs"]
-            qshft, cshft, rshft = (
-                dcur["shft_qseqs"],
-                dcur["shft_cseqs"],
-                dcur["shft_rseqs"],
-            )
-
+            if model_name in ["dimkt"]:
+                q, c, r, sd, qd = (
+                    dcur["qseqs"],
+                    dcur["cseqs"],
+                    dcur["rseqs"],
+                    dcur["sdseqs"],
+                    dcur["qdseqs"],
+                )
+                qshft, cshft, rshft, sdshft, qdshft = (
+                    dcur["shft_qseqs"],
+                    dcur["shft_cseqs"],
+                    dcur["shft_rseqs"],
+                    dcur["shft_sdseqs"],
+                    dcur["shft_qdseqs"],
+                )
+                sd, qd, sdshft, qdshft = (
+                    sd.to(device),
+                    qd.to(device),
+                    sdshft.to(device),
+                    qdshft.to(device),
+                )
+            else:
+                q, c, r = dcur["qseqs"], dcur["cseqs"], dcur["rseqs"]
+                qshft, cshft, rshft = (
+                    dcur["shft_qseqs"],
+                    dcur["shft_cseqs"],
+                    dcur["shft_rseqs"],
+                )
             m, sm = dcur["masks"], dcur["smasks"]
             q, c, r, qshft, cshft, rshft, m, sm = (
                 q.to(device),
@@ -184,18 +209,100 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
                 m.to(device),
                 sm.to(device),
             )
-            model.eval()
+            if model.model_name in que_type_models and model_name not in [
+                "lpkt",
+                "rkt",
+            ]:
+                model.model.eval()
+            else:
+                model.eval()
 
+            # print(f"before y: {y.shape}")
             cq = torch.cat((q[:, 0:1], qshft), dim=1)
             cc = torch.cat((c[:, 0:1], cshft), dim=1)
             cr = torch.cat((r[:, 0:1], rshft), dim=1)
-
-            if model_name in ["dkt", "dkt+"]:
+            if model_name in ["atdkt"]:
+                """
+                y = model(dcur)
+                import pickle
+                with open(f"{test_mini_index}_result.pkl",'wb') as f:
+                    data = {"y":y,"cshft":cshft,"num_c":model.num_c,"rshft":rshft,"qshft":qshft,"sm":sm}
+                    pickle.dump(data,f)
+                """
+                y = model(dcur)
+                y = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
+            elif model_name in ["rkt"]:
+                y, attn = model(dcur, rel)
+                y = y[:, 1:]
+                if q.numel() > 0:
+                    c, cshft = q, qshft  # question level
+            elif model_name in ["bakt_time"]:
+                y = model(dcur, dgaps)
+                y = y[:, 1:]
+            elif model_name in ["simplekt", "sparsekt"]:
+                y = model(dcur)
+                y = y[:, 1:]
+            elif model_name in ["dkt", "dkt+"]:
                 y = model(c.long(), r.long())
                 y = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
-            elif model_name in ["sakt"]:
+            elif model_name in ["dkt_forget"]:
+                y = model(c.long(), r.long(), dgaps)
+                y = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
+            elif model_name in ["dkvmn", "deep_irt", "skvmn", "deep_irt"]:
+                y = model(cc.long(), cr.long())
+                y = y[:, 1:]
+            elif model_name in ["kqn", "sakt"]:
                 y = model(c.long(), r.long(), cshft.long())
-
+            elif model_name == "saint":
+                y = model(cq.long(), cc.long(), r.long())
+                y = y[:, 1:]
+            elif model_name in [
+                "akt",
+                "akt_vector",
+                "akt_norasch",
+                "akt_mono",
+                "akt_attn",
+                "aktattn_pos",
+                "aktmono_pos",
+                "akt_raschx",
+                "akt_raschy",
+                "aktvec_raschx",
+            ]:
+                y, reg_loss = model(cc.long(), cr.long(), cq.long())
+                y = y[:, 1:]
+            elif model_name in ["atkt", "atktfix"]:
+                y, _ = model(c.long(), r.long())
+                y = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
+            elif model_name == "gkt":
+                y = model(cc.long(), cr.long())
+            elif model_name == "lpkt":
+                # cat = torch.cat((d["at_seqs"][:,0:1], dshft["at_seqs"]), dim=1).to(device)
+                cit = torch.cat((dcur["itseqs"][:, 0:1], dcur["shft_itseqs"]), dim=1)
+                y = model(cq.long(), cr.long(), cit.long())
+                y = y[:, 1:]
+                c, cshft = q, qshft  # question level
+            elif model_name == "hawkes":
+                ct = torch.cat((dcur["tseqs"][:, 0:1], dcur["shft_tseqs"]), dim=1)
+                # csm = torch.cat((dcur["smasks"][:,0:1], dcur["smasks"]), dim=1)
+                y = model(cc.long(), cq.long(), ct.long(), cr.long())  # , csm.long())
+                y = y[:, 1:]
+            elif model_name in que_type_models and model_name != "lpkt":
+                y = model.predict_one_step(data)
+                c, cshft = q, qshft  # question level
+            elif model_name == "dimkt":
+                y = model(
+                    q.long(),
+                    c.long(),
+                    sd.long(),
+                    qd.long(),
+                    r.long(),
+                    qshft.long(),
+                    cshft.long(),
+                    sdshft.long(),
+                    qdshft.long(),
+                )
+            # print(f"after y: {y.shape}")
+            # save predict result
             if save_path != "":
                 result = save_cur_predict_result(dres, c, r, cshft, rshft, m, sm, y)
                 fout.write(result + "\n")
@@ -207,7 +314,6 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
             y_trues.append(t.numpy())
             y_scores.append(y.numpy())
             test_mini_index += 1
-
         ts = np.concatenate(y_trues, axis=0)
         ps = np.concatenate(y_scores, axis=0)
         print(f"ts.shape: {ts.shape}, ps.shape: {ps.shape}")
@@ -215,7 +321,8 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
 
         prelabels = [1 if p >= 0.5 else 0 for p in ps]
         acc = metrics.accuracy_score(ts, prelabels)
-
+    # if save_path != "":
+    #     pd.to_pickle(dres, save_path+".pkl")
     return auc, acc
 
 
@@ -825,26 +932,7 @@ def predict_each_group2(
     atkt_pad=False,
     maxlen=200,
 ):
-    """not use the predict result"""
-    curqin, curcin, currin, curtin = (
-        dcur["curqin"],
-        dcur["curcin"],
-        dcur["currin"],
-        dcur["curtin"],
-    )
-    cq, cc, cr, ct = dtotal["cq"], dtotal["cc"], dtotal["cr"], dtotal["ct"]
-    if model_name == "lpkt":
-        cit = dtotal["cit"]
-    elif model_name == "dimkt":
-        csd = dtotal["csd"]
-        cqd = dtotal["cqd"]
-    nextcin, nextrin = curcin, currin
-    import copy
-
-    nextdforget = copy.deepcopy(curdforget)
     ctrues, cpreds = [], []
-    # 以下这些用的是同一个历史,可以并行
-    # 不用预测结果
     if model_name == "lpkt":
         (
             qidxs,
@@ -1475,9 +1563,6 @@ def evaluate_splitpred_question(
         fout = open(save_path, "w", encoding="utf8")
 
     with torch.no_grad():
-        y_trues = []
-        y_scores = []
-        dres = dict()
         idx = 0
         df = pd.read_csv(testf)
         dcres, dqres = {"trues": [], "preds": []}, {
@@ -1486,7 +1571,7 @@ def evaluate_splitpred_question(
             "late_vote": [],
             "late_all": [],
         }
-        for i, row in df.iterrows():
+        for _, row in df.iterrows():
             model.eval()
             dforget = (
                 dict()
@@ -1622,6 +1707,7 @@ def evaluate_splitpred_question(
                     )
                     t = end
                     qidx += 1
+                    fout.write("\n")
             idx += 1
 
         try:

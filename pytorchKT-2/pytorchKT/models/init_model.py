@@ -3,6 +3,7 @@ import numpy as np
 import os
 from .dkt import DKT
 from .sakt import SAKT
+from .dkvmn import DKVMN
 
 device = "cpu" if not torch.cuda.is_available() else "cuda"
 
@@ -25,6 +26,14 @@ def init_model(model_name, model_config, data_config, emb_type):
             dropout=model_config["dropout"],
             num_en=model_config["num_en"],
             emb_type=emb_type,
+        ).to(device)
+    elif model_name == "dkvmn":
+        model = DKVMN(
+            data_config["num_c"],
+            dim_s=model_config["dim_s"],
+            size_m=model_config["size_m"],
+            emb_type=emb_type,
+            emb_path=data_config["emb_path"],
         ).to(device)
     else:
         print("The wrong model name was used...")

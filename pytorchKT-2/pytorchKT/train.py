@@ -24,7 +24,7 @@ def save_config(train_config, model_config, data_config, params, save_dir):
         "params": params,
     }
     save_path = os.path.join(save_dir, "config.json")
-    with open(save_path, "w") as fout:
+    with open(save_path, "w", encoding="utf-8") as fout:
         json.dump(d, fout)
 
 
@@ -41,7 +41,7 @@ def train():
 
     debug_print(text="load config files.", fuc_name="main")
 
-    with open("./pytorchKT/configs/kt_config.json") as f:
+    with open("./pytorchKT/configs/kt_config.json", encoding="utf-8") as f:
         config = json.load(f)
         train_config = config["train_config"]
         keys = config[model_name].keys()
@@ -81,7 +81,7 @@ def train():
     seq_len = train_config["seq_len"]
 
     print("Start init data")
-    print(dataset_name, model_name, data_config, fold, batch_size)
+    print(dataset_name, model_name, data_config[dataset_name], fold, batch_size)
 
     debug_print(text="init_dataset", fuc_name="main")
     train_loader, valid_loader, *_ = init_dataset4train(
@@ -173,6 +173,13 @@ def train():
         + str(validacc)
         + "\t"
         + str(best_epoch)
+    )
+    save_config(
+        train_config,
+        model_config,
+        data_config[dataset_name],
+        params,
+        save_dir=ckpt_path,
     )
     print(f"end:{datetime.datetime.now()}")
 

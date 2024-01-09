@@ -20,7 +20,7 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
         t = torch.masked_select(rshft, sm)
 
         loss = binary_cross_entropy(y.double(), t.double())
-    elif model_name in ["sakt"]:
+    elif model_name in ["sakt", "dkvmn"]:
         y = torch.masked_select(ys[0], sm)
         t = torch.masked_select(rshft, sm)
         loss = binary_cross_entropy(y.double(), t.double())
@@ -56,6 +56,9 @@ def model_forward(model: nn.Module, data, rel=None):
     elif model_name in ["sakt"]:
         y = model(c.long(), r.long(), cshft.long())
         ys.append(y)
+    elif model_name in ["dkvmn"]:
+        y = model(cc.long(), cr.long())
+        ys.append(y[:, 1:])
 
     loss = cal_loss(model, ys, r, rshft, sm, preloss)
     return loss
@@ -71,13 +74,9 @@ def train_model(
     test_loader=None,
     test_window_loader=None,
     save_model=False,
-    data_config=None,
-    fold=None,
 ):
     max_auc, best_epoch = 0, -1
     train_step = 0
-
-    rel = None
 
     for i in range(1, num_epochs + 1):
         loss_mean = []

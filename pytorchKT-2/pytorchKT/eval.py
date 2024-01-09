@@ -20,7 +20,7 @@ def eval():
         params["train_ratio"],
     )
 
-    with open(os.path.join(save_dir, "config.json")) as fin:
+    with open(os.path.join(save_dir, "config.json"), encoding="utf-8") as fin:
         config = json.load(fin)
         model_config = copy.deepcopy(config["model_config"])
 
