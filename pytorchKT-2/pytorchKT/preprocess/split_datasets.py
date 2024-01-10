@@ -106,6 +106,24 @@ def read_data(fname, min_seq_len=3, response_set=[0, 1]):
     print(
         f"delete bad stu num of len: {delstu}, delete interactions: {delnum}, of r: {badr}, good num: {goodnum}"
     )
+    """
+    effective keys:
+        uid: user id
+        questions: question id or NA
+        concepts: Knowledge Komponents each question (Skills) - 58_85, 278: 278 question one KC, 58_85 question two KC (58, 85)
+        responses: interaction user - question
+        timestamps:
+        usetimes:
+    """
+    """
+    df: one line is one user
+        uid: int
+        questions: list(int)
+        concepts: list(str)
+        responses: list(int)
+        timestamps: list(int) or NA
+        usetimes: list(int) or NA
+    """
     return df, effective_keys
 
 
@@ -408,7 +426,7 @@ def generate_question_sequences(
         seq_num = len(dexpand["responses"])
         for j in range(seq_num):
             curlen = len(dexpand["responses"][j])
-            if curlen < 2:  # 不预测第一个题
+            if curlen < 2:
                 continue
             if curlen < maxlen:
                 for key in dexpand:
@@ -565,7 +583,7 @@ def write_config(
 def calStatistics(df, stares, key):
     allin, allselect = 0, 0
     allqs, allcs = set(), set()
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         rs = row["responses"].split(",")
         curlen = len(rs) - rs.count("-1")
         allin += curlen
@@ -625,7 +643,7 @@ def split_concept(
     total_df, effective_keys = read_data(fname)
     # cal max_concepts
     if "concepts" in effective_keys:
-        max_concepts = get_max_concepts(total_df)
+        max_concepts = get_max_concepts(total_df)  # max KCs with question
     else:
         max_concepts = -1
 
@@ -682,25 +700,25 @@ def split_concept(
     )
     print("=" * 20)
 
-    test_window_seqs = generate_window_sequences(
-        test_df, list(effective_keys) + ["cidxs"], maxlen
-    )
+    # test_window_seqs = generate_window_sequences(
+    #     test_df, list(effective_keys) + ["cidxs"], maxlen
+    # )
     flag, test_question_seqs = generate_question_sequences(
         test_df, effective_keys, False, min_seq_len, maxlen
     )
-    flag, test_question_window_seqs = generate_question_sequences(
-        test_df, effective_keys, True, min_seq_len, maxlen
-    )
+    # flag, test_question_window_seqs = generate_question_sequences(
+    #     test_df, effective_keys, True, min_seq_len, maxlen
+    # )
 
     test_df = test_df[config + ["cidxs"]]
 
     test_df.to_csv(os.path.join(dname, "test.csv"), index=None)
     test_seqs.to_csv(os.path.join(dname, "test_sequences.csv"), index=None)
-    test_window_seqs.to_csv(
-        os.path.join(dname, "test_window_sequences.csv"), index=None
-    )
+    # test_window_seqs.to_csv(
+    #     os.path.join(dname, "test_window_sequences.csv"), index=None
+    # )
 
-    ins, ss, qs, cs, seqnum = calStatistics(test_window_seqs, stares, "test window")
+    # ins, ss, qs, cs, seqnum = calStatistics(test_window_seqs, stares, "test window")
     print(
         f"test window interactions num: {ins}, select num: {ss}, qs: {qs}, cs: {cs}, seqnum: {seqnum}"
     )
@@ -709,22 +727,22 @@ def split_concept(
         test_question_seqs.to_csv(
             os.path.join(dname, "test_question_sequences.csv"), index=None
         )
-        test_question_window_seqs.to_csv(
-            os.path.join(dname, "test_question_window_sequences.csv"), index=None
-        )
+    #     test_question_window_seqs.to_csv(
+    #         os.path.join(dname, "test_question_window_sequences.csv"), index=None
+    #     )
 
-        ins, ss, qs, cs, seqnum = calStatistics(
-            test_question_seqs, stares, "test question"
-        )
-        print(
-            f"test question interactions num: {ins}, select num: {ss}, qs: {qs}, cs: {cs}, seqnum: {seqnum}"
-        )
-        ins, ss, qs, cs, seqnum = calStatistics(
-            test_question_window_seqs, stares, "test question window"
-        )
-        print(
-            f"test question window interactions num: {ins}, select num: {ss}, qs: {qs}, cs: {cs}, seqnum: {seqnum}"
-        )
+    #     ins, ss, qs, cs, seqnum = calStatistics(
+    #         test_question_seqs, stares, "test question"
+    #     )
+    #     print(
+    #         f"test question interactions num: {ins}, select num: {ss}, qs: {qs}, cs: {cs}, seqnum: {seqnum}"
+    #     )
+    #     ins, ss, qs, cs, seqnum = calStatistics(
+    #         test_question_window_seqs, stares, "test question window"
+    #     )
+    #     print(
+    #         f"test question window interactions num: {ins}, select num: {ss}, qs: {qs}, cs: {cs}, seqnum: {seqnum}"
+    #     )
 
     write_config(
         dataset_name=dataset_name,
@@ -735,7 +753,6 @@ def split_concept(
         k=kfold,
         min_seq_len=min_seq_len,
         maxlen=maxlen,
-        flag=flag,
     )
 
     print("=" * 20)

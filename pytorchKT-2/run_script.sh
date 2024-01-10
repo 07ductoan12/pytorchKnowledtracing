@@ -2,11 +2,11 @@
 
 SCRIPT_PATH=./main.py
 
-ACTION="eval"
+ACTION="train"
 
 # Set the arguments for your script
 if [ "$ACTION" == "train" ]; then
-    ARGS=( "--dataset_name" "ednet"
+    ARGS=( "--dataset_name" "assist2009"
            "--model_name" "dkvmn"
            "--emb_type" "qid"
            "--save_dir" "saved_model"
@@ -20,7 +20,7 @@ if [ "$ACTION" == "train" ]; then
            "--num_en" "1"
            )
 else
-    ARGS=( "--save_dir" "./saved_model/train_assist2015_sakt_qid_saved_model_42_0_0.2_128_256_0.001_8_1_32"
+    ARGS=( "--save_dir" "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/saved_model/train_ednet_dkvmn_qid_saved_model_42_0_0.2_128_256_0.001_8_1_32"
            "--test_filename" "test.csv"
            "--use_pred" "0"
            "--train_ratio" "0.9"
