@@ -1,6 +1,6 @@
 import torch
 from torch.nn import Module, Embedding, Linear, MultiheadAttention, LayerNorm, Dropout
-from .utils import get_clones, transformer_FFN, pos_encode, ut_mask
+from pytorchKT.models.utils import get_clones, transformer_FFN, pos_encode, ut_mask
 
 
 class Blocks(Module):

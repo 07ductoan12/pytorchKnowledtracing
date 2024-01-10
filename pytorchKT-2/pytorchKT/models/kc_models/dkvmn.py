@@ -1,6 +1,3 @@
-import os
-
-import numpy as np
 import torch
 
 from torch.nn import Module, Parameter, Embedding, Linear, Dropout
@@ -15,8 +12,6 @@ class DKVMN(Module):
         size_m,
         dropout=0.2,
         emb_type="qid",
-        emb_path="",
-        pretrain_dim=768,
     ):
         super().__init__()
         self.model_name = "dkvmn"
