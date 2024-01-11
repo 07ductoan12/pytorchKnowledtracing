@@ -23,7 +23,10 @@ def get_train_argments():
         choices=["assist2015", "assist2009", "ednet", "junyi"],
     )
     parser.add_argument(
-        "--model_name", type=str, default="dkt", choices=["dkt", "sakt", "dkvmn"]
+        "--model_name",
+        type=str,
+        default="dkt",
+        choices=["dkt", "sakt", "dkvmn", "dimkt"],
     )
     parser.add_argument("--emb_type", type=str, default="qid")
     parser.add_argument("--save_dir", type=str, default="saved_model")
@@ -38,5 +41,8 @@ def get_train_argments():
     parser.add_argument("--num_attn_heads", type=int, default=8)
     parser.add_argument("--num_en", type=int, default=1)
     parser.add_argument("--size_m", type=int, default=50)
+    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--num_steps", type=int, default=199)
+    parser.add_argument("--difficult_levels", type=int, default=100)
 
     return parser.parse_args()

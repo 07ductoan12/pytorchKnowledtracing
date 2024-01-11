@@ -6,7 +6,7 @@ ACTION="eval"
 
 # Set the arguments for your script
 if [ "$ACTION" == "train" ]; then
-    ARGS=( "--dataset_name" "assist2009"
+    ARGS=( "--dataset_name" "ednet"
            "--model_name" "dkvmn"
            "--emb_type" "qid"
            "--save_dir" "saved_model"
@@ -18,9 +18,11 @@ if [ "$ACTION" == "train" ]; then
            "--dim_s" "128"
            "--size_m" "32"
            "--num_en" "1"
+           "--difficult_levels" "100"
+           "--num_steps" "199"
            )
 else
-    ARGS=( "--save_dir" "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/saved_model/train_assist2009_dkvmn_qid_saved_model_42_0_0.2_128_256_0.001_8_1_32"
+    ARGS=( "--save_dir" "./saved_model/train_ednet_dkvmn_qid_saved_model_42_0_0.2_128_256_0.001_8_1_32_64_199_100"
            "--test_filename" "test.csv"
            "--use_pred" "0"
            "--train_ratio" "0.9"

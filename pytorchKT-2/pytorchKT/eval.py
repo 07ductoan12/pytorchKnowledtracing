@@ -1,7 +1,5 @@
-import os, sys
-import argparse
+import os
 import json
-import torch
 import copy
 
 from pytorchKT.models import evaluate_splitpred_question, load_model
@@ -19,6 +17,8 @@ def eval():
         params["use_pred"],
         params["train_ratio"],
     )
+
+    # save_dir = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/saved_model/train_assist2009_dkvmn_qid_saved_model_42_0_0.2_128_256_0.001_8_1_32"
 
     with open(os.path.join(save_dir, "config.json"), encoding="utf-8") as fin:
         config = json.load(fin)
@@ -79,8 +79,3 @@ def eval():
     for key in dfinal:
         print(key, dfinal[key])
     dfinal.update(config["params"])
-
-
-if __name__ == "__main__":
-    if sys.argv[1] == "eval":
-        eval()

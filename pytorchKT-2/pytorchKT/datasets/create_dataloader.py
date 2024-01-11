@@ -2,6 +2,7 @@ import os
 from torch.utils.data import DataLoader
 import numpy as np
 from pytorchKT.datasets.create_dataset import KTDataset
+from pytorchKT.datasets.dimkt_dataset import DIMKTDataset
 
 
 def init_dataset4train(
@@ -11,16 +12,32 @@ def init_dataset4train(
     data_config = data_config[dataset_name]
     all_folds = set(data_config["folds"])
 
-    curvalid = KTDataset(
-        os.path.join(data_config["dpath"], data_config["train_valid_file"]),
-        data_config["input_type"],
-        {i},
-    )
-    curtrain = KTDataset(
-        os.path.join(data_config["dpath"], data_config["train_valid_file"]),
-        data_config["input_type"],
-        all_folds - {i},
-    )
+    if model_name == "dimkt":
+        curvalid = DIMKTDataset(
+            data_config["dpath"],
+            os.path.join(data_config["dpath"], data_config["train_valid_file"]),
+            data_config["input_type"],
+            {i},
+            diff_level=diff_level,
+        )
+        curtrain = DIMKTDataset(
+            data_config["dpath"],
+            os.path.join(data_config["dpath"], data_config["train_valid_file"]),
+            data_config["input_type"],
+            all_folds - {i},
+            diff_level=diff_level,
+        )
+    else:
+        curvalid = KTDataset(
+            os.path.join(data_config["dpath"], data_config["train_valid_file"]),
+            data_config["input_type"],
+            {i},
+        )
+        curtrain = KTDataset(
+            os.path.join(data_config["dpath"], data_config["train_valid_file"]),
+            data_config["input_type"],
+            all_folds - {i},
+        )
 
     train_dataloader = DataLoader(curtrain, batch_size=batch_size)
     valid_dataloader = DataLoader(curvalid, batch_size=batch_size)
@@ -33,18 +50,54 @@ def init_test_datasets(data_config, model_name, batch_size, diff_level=None):
     print(f"model_name is {model_name}, dataset_name is {dataset_name}")
     test_question_loader, test_question_window_loader = None, None
 
-    test_dataset = KTDataset(
-        os.path.join(data_config["dpath"], data_config["test_file"]),
-        data_config["type_input"],
-        {-1},
-        True,
-    )
-    test_window_dataset = KTDataset(
-        os.path.join(data_config["dpath"], data_config["test_window_file"]),
-        data_config["input_type"],
-        {-1},
-        True,
-    )
+    if model_name in ["dimkt"]:
+        test_dataset = DIMKTDataset(
+            data_config["dpath"],
+            os.path.join(data_config["dpath"], data_config["test_file"]),
+            data_config["input_type"],
+            {-1},
+            diff_level=diff_level,
+        )
+        test_window_dataset = DIMKTDataset(
+            data_config["dpath"],
+            os.path.join(data_config["dpath"], data_config["test_window_file"]),
+            data_config["input_type"],
+            {-1},
+            diff_level=diff_level,
+        )
+        if "test_question_file" in data_config:
+            test_question_dataset = DIMKTDataset(
+                data_config["dpath"],
+                os.path.join(data_config["dpath"], data_config["test_question_file"]),
+                data_config["input_type"],
+                {-1},
+                True,
+                diff_level=diff_level,
+            )
+            test_question_window_dataset = DIMKTDataset(
+                data_config["dpath"],
+                os.path.join(
+                    data_config["dpath"], data_config["test_question_window_file"]
+                ),
+                data_config["input_type"],
+                {-1},
+                True,
+                diff_level=diff_level,
+            )
+
+    else:
+        test_dataset = KTDataset(
+            os.path.join(data_config["dpath"], data_config["test_file"]),
+            data_config["type_input"],
+            {-1},
+            True,
+        )
+        test_window_dataset = KTDataset(
+            os.path.join(data_config["dpath"], data_config["test_window_file"]),
+            data_config["input_type"],
+            {-1},
+            True,
+        )
 
     if "test_question_file" in data_config:
         test_question_dataset = KTDataset(

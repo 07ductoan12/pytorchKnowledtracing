@@ -20,7 +20,7 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
         t = torch.masked_select(rshft, sm)
 
         loss = binary_cross_entropy(y.double(), t.double())
-    elif model_name in ["sakt", "dkvmn"]:
+    elif model_name in ["sakt", "dkvmn", "dimkt"]:
         y = torch.masked_select(ys[0], sm)
         t = torch.masked_select(rshft, sm)
         loss = binary_cross_entropy(y.double(), t.double())
@@ -31,19 +31,39 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
 def model_forward(model: nn.Module, data, rel=None):
     model_name = model.model_name
     dcur = data
-    q, c, r, t = (
-        dcur["qseqs"].to(device),
-        dcur["cseqs"].to(device),
-        dcur["rseqs"].to(device),
-        dcur["tseqs"].to(device),
-    )
-    qshft, cshft, rshft, tshft = (
-        dcur["shft_qseqs"].to(device),
-        dcur["shft_cseqs"].to(device),
-        dcur["shft_rseqs"].to(device),
-        dcur["shft_tseqs"].to(device),
-    )
+
+    if model_name in ["dimkt"]:
+        q, c, r, t, sd, qd = (
+            dcur["qseqs"].to(device),
+            dcur["cseqs"].to(device),
+            dcur["rseqs"].to(device),
+            dcur["tseqs"].to(device),
+            dcur["sdseqs"].to(device),
+            dcur["qdseqs"].to(device),
+        )
+        qshft, cshft, rshft, tshft, sdshft, qdshft = (
+            dcur["shft_qseqs"].to(device),
+            dcur["shft_cseqs"].to(device),
+            dcur["shft_rseqs"].to(device),
+            dcur["shft_tseqs"].to(device),
+            dcur["shft_sdseqs"].to(device),
+            dcur["shft_qdseqs"].to(device),
+        )
+    else:
+        q, c, r, t = (
+            dcur["qseqs"].to(device),
+            dcur["cseqs"].to(device),
+            dcur["rseqs"].to(device),
+            dcur["tseqs"].to(device),
+        )
+        qshft, cshft, rshft, tshft = (
+            dcur["shft_qseqs"].to(device),
+            dcur["shft_cseqs"].to(device),
+            dcur["shft_rseqs"].to(device),
+            dcur["shft_tseqs"].to(device),
+        )
     m, sm = dcur["masks"].to(device), dcur["smasks"].to(device)
+
     ys, preloss = [], []
     cq = torch.cat((q[:, 0:1], qshft), dim=1)
     cc = torch.cat((c[:, 0:1], cshft), dim=1)
