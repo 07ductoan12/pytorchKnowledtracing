@@ -1044,7 +1044,6 @@ def predict_each_group(
         if model_name == "dimkt":
             sdin = cursdin
             qdin = curqdin
-        # 输入长度大于200时，截断
         # print("cin: ", cin)
         start = 0
         cinlen = cin.shape[1]
@@ -1065,7 +1064,7 @@ def predict_each_group(
             sdin = sdin[:, start:]
             qdin = qdin[:, start:]
         # print(f"start: {start}, cin: {cin.shape}")
-        cout, true = cc.long()[k], cr.long()[k]  # 当前预测的是第k个
+        cout, true = cc.long()[k], cr.long()[k]
         qout = None if cq.shape[0] == 0 else cq.long()[k]
         tout = None if ct.shape[0] == 0 else ct.long()[k]
 

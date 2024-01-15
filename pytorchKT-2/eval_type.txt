@@ -1,1 +1,1 @@
-idx, uid, qlen, qtrain_len, ctrainlen, late_mean, late_vote, late_all
+idx, uid, k, qid, is_repeate, len concepts, concepts, responses, 

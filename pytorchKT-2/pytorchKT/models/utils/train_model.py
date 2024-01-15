@@ -9,7 +9,7 @@ from torch.autograd import Variable, grad
 import pandas as pd
 from pytorchKT.utils.utils import debug_print
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def cal_loss(model, ys, r, rshft, sm, preloss=[]):
@@ -24,6 +24,29 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
         y = torch.masked_select(ys[0], sm)
         t = torch.masked_select(rshft, sm)
         loss = binary_cross_entropy(y.double(), t.double())
+    elif model_name in ["dkt+"]:
+        y_curr = torch.masked_select(ys[1], sm)
+        y_next = torch.masked_select(ys[0], sm)
+        r_curr = torch.masked_select(r, sm)
+        r_next = torch.masked_select(rshft, sm)
+        loss = binary_cross_entropy(y_next.double(), r_next.double())
+
+        loss_r = binary_cross_entropy(y_curr.double(), r_curr.double())
+        loss_w1 = torch.masked_select(
+            torch.norm(ys[2][:, 1:] - ys[2][:, :-1], p=1, dim=-1), sm[:, 1:]
+        )
+        loss_w1 = loss_w1.mean() / model.num_c
+        loss_w2 = torch.masked_select(
+            torch.norm(ys[2][:, 1:] - ys[2][:, :-1], p=2, dim=-1) ** 2, sm[:, 1:]
+        )
+        loss_w2 = loss_w2.mean() / model.num_c
+
+        loss = (
+            loss
+            + model.lambda_r * loss_r
+            + model.lambda_w1 * loss_w1
+            + model.lambda_w2 * loss_w2
+        )
 
     return loss
 
@@ -34,35 +57,35 @@ def model_forward(model: nn.Module, data, rel=None):
 
     if model_name in ["dimkt"]:
         q, c, r, t, sd, qd = (
-            dcur["qseqs"].to(device),
-            dcur["cseqs"].to(device),
-            dcur["rseqs"].to(device),
-            dcur["tseqs"].to(device),
-            dcur["sdseqs"].to(device),
-            dcur["qdseqs"].to(device),
+            dcur["qseqs"].to(DEVICE),
+            dcur["cseqs"].to(DEVICE),
+            dcur["rseqs"].to(DEVICE),
+            dcur["tseqs"].to(DEVICE),
+            dcur["sdseqs"].to(DEVICE),
+            dcur["qdseqs"].to(DEVICE),
         )
         qshft, cshft, rshft, tshft, sdshft, qdshft = (
-            dcur["shft_qseqs"].to(device),
-            dcur["shft_cseqs"].to(device),
-            dcur["shft_rseqs"].to(device),
-            dcur["shft_tseqs"].to(device),
-            dcur["shft_sdseqs"].to(device),
-            dcur["shft_qdseqs"].to(device),
+            dcur["shft_qseqs"].to(DEVICE),
+            dcur["shft_cseqs"].to(DEVICE),
+            dcur["shft_rseqs"].to(DEVICE),
+            dcur["shft_tseqs"].to(DEVICE),
+            dcur["shft_sdseqs"].to(DEVICE),
+            dcur["shft_qdseqs"].to(DEVICE),
         )
     else:
         q, c, r, t = (
-            dcur["qseqs"].to(device),
-            dcur["cseqs"].to(device),
-            dcur["rseqs"].to(device),
-            dcur["tseqs"].to(device),
+            dcur["qseqs"].to(DEVICE),
+            dcur["cseqs"].to(DEVICE),
+            dcur["rseqs"].to(DEVICE),
+            dcur["tseqs"].to(DEVICE),
         )
         qshft, cshft, rshft, tshft = (
-            dcur["shft_qseqs"].to(device),
-            dcur["shft_cseqs"].to(device),
-            dcur["shft_rseqs"].to(device),
-            dcur["shft_tseqs"].to(device),
+            dcur["shft_qseqs"].to(DEVICE),
+            dcur["shft_cseqs"].to(DEVICE),
+            dcur["shft_rseqs"].to(DEVICE),
+            dcur["shft_tseqs"].to(DEVICE),
         )
-    m, sm = dcur["masks"].to(device), dcur["smasks"].to(device)
+    m, sm = dcur["masks"].to(DEVICE), dcur["smasks"].to(DEVICE)
 
     ys, preloss = [], []
     cq = torch.cat((q[:, 0:1], qshft), dim=1)
@@ -79,6 +102,24 @@ def model_forward(model: nn.Module, data, rel=None):
     elif model_name in ["dkvmn"]:
         y = model(cc.long(), cr.long())
         ys.append(y[:, 1:])
+    elif model_name == "dimkt":
+        y = model(
+            q.long(),
+            c.long(),
+            sd.long(),
+            qd.long(),
+            r.long(),
+            qshft.long(),
+            cshft.long(),
+            sdshft.long(),
+            qdshft.long(),
+        )
+        ys.append(y)
+    elif model_name == "dkt+":
+        y = model(c.long(), r.long())
+        y_next = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
+        y_curr = (y * one_hot(c.long(), model.num_c)).sum(-1)
+        ys = [y_next, y_curr, y]
 
     loss = cal_loss(model, ys, r, rshft, sm, preloss)
     return loss

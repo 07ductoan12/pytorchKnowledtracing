@@ -11,7 +11,7 @@ from pytorchKT.models import train_model, init_model
 from pytorchKT.datasets.create_dataloader import init_dataset4train
 from pytorchKT.utils import debug_print
 import datetime
-from pytorchKT.arguments import get_train_argments
+from pytorchKT.arguments import get_train_arguments
 
 device = "cpu" if not torch.cuda.is_available() else "cuda"
 
@@ -29,7 +29,7 @@ def save_config(train_config, model_config, data_config, params, save_dir):
 
 
 def train():
-    params = vars(get_train_argments())
+    params = vars(get_train_arguments())
 
     model_name, dataset_name, fold, emb_type, save_dir = (
         params["model_name"],
@@ -84,9 +84,20 @@ def train():
     print(dataset_name, model_name, data_config[dataset_name], fold, batch_size)
 
     debug_print(text="init_dataset", fuc_name="main")
-    train_loader, valid_loader, *_ = init_dataset4train(
-        dataset_name, model_name, data_config, fold, batch_size
-    )
+    if model_name not in ["dimkt"]:
+        train_loader, valid_loader, *_ = init_dataset4train(
+            dataset_name, model_name, data_config, fold, batch_size
+        )
+    else:
+        diff_level = params["difficult_levels"]
+        train_loader, valid_loader, *_ = init_dataset4train(
+            dataset_name,
+            model_name,
+            data_config,
+            fold,
+            batch_size,
+            diff_level=diff_level,
+        )
 
     params_str = "_".join(
         [str(v) for k, v in params.items() if not k in ["other_config"]]

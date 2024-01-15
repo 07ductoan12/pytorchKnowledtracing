@@ -1,6 +1,6 @@
 import torch
 import os
-from pytorchKT.models.kc_models import DKT, SAKT, DKVMN, DIMKT
+from pytorchKT.models.kc_models import DKT, SAKT, DKVMN, DIMKT, DKTPlus
 
 DEVICE = "cpu" if not torch.cuda.is_available() else "cuda"
 
@@ -13,6 +13,16 @@ def init_model(model_name, model_config, data_config, emb_type):
             dropout=model_config["dropout"],
             emb_type=emb_type,
             emb_path=data_config["emb_path"],
+        ).to(DEVICE)
+    elif model_name == "dkt+":
+        model = DKTPlus(
+            data_config["num_c"],
+            emb_size=model_config["emb_size"],
+            lambda_r=model_config["lambda_r"],
+            lambda_w1=model_config["lambda_w1"],
+            lambda_w2=model_config["lambda_w2"],
+            dropout=model_config["dropout"],
+            emb_type=emb_type,
         ).to(DEVICE)
     elif model_name == "sakt":
         model = SAKT(
