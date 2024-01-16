@@ -1,5 +1,4 @@
 import torch
-
 from torch.nn import Module, Parameter, Embedding, Linear, Dropout
 from torch.nn.init import kaiming_normal_
 
@@ -74,7 +73,7 @@ class DKVMN(Module):
         p = torch.sigmoid(p)
         # print(f"p: {p.shape}")
         p = p.squeeze(-1)
+
         if not qtest:
             return p
-        else:
-            return p, f
+        return p, f

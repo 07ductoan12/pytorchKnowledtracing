@@ -12,8 +12,6 @@ class DKTPlus(Module):
         lambda_w2,
         dropout=0.1,
         emb_type="qid",
-        emb_path="",
-        pretrain_dim=768,
     ) -> None:
         super().__init__()
         self.model_name = "dkt+"
@@ -34,11 +32,11 @@ class DKTPlus(Module):
     def forward(self, q, r):
         emb_type = self.emb_type
         if emb_type == "qid":
-            x = q + self.num_c * r
-            xemb = self.interaction_emb(x)
+            inp = q + self.num_c * r
+            xemb = self.interaction_emb(inp)
 
-        h, _ = self.lstm_layer(xemb)
-        h = self.dropout_layer(h)
-        y = self.out_layer(h)
-        y = torch.sigmoid(y)
-        return y
+        out, _ = self.lstm_layer(xemb)
+        out = self.dropout_layer(out)
+        out = self.out_layer(out)
+        out = torch.sigmoid(out)
+        return out

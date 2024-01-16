@@ -18,8 +18,6 @@ def eval():
         params["train_ratio"],
     )
 
-    # save_dir = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/saved_model/train_assist2009_dkvmn_qid_saved_model_42_0_0.2_128_256_0.001_8_1_32"
-
     with open(os.path.join(save_dir, "config.json"), encoding="utf-8") as fin:
         config = json.load(fin)
         model_config = copy.deepcopy(config["model_config"])
@@ -44,12 +42,12 @@ def eval():
     )
     print(f"model_config: {model_config}")
     print(f"data_config: {data_config}")
-    use_pred = True if use_pred == 1 else False
+    use_pred = use_pred == 1
 
     model = load_model(model_name, model_config, data_config, emb_type, save_dir)
 
     print(f"Start predict use_pred: {use_pred}, ratio: {ratio}...")
-    atkt_pad = True if params["atkt_pad"] == 1 else False
+    atkt_pad = params["atkt_pad"] == 1
     if model_name == "atkt":
         save_test_path = os.path.join(
             save_dir,
@@ -76,6 +74,6 @@ def eval():
     dfinal = evaluate_splitpred_question(
         model, data_config, testf, model_name, save_test_path, use_pred, ratio, atkt_pad
     )
-    for key in dfinal:
-        print(key, dfinal[key])
+    for key, values in dfinal.items():
+        print(key, values)
     dfinal.update(config["params"])

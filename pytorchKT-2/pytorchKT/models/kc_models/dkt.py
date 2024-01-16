@@ -1,14 +1,4 @@
-import os
-import numpy as np
 import torch
-from torch.nn import Module, Embedding, LSTM, Linear, Dropout
-
-
-import os
-
-import numpy as np
-import torch
-
 from torch.nn import Module, Embedding, LSTM, Linear, Dropout
 
 
@@ -19,8 +9,6 @@ class DKT(Module):
         emb_size,
         dropout=0.1,
         emb_type="qid",
-        emb_path="",
-        pretrain_dim=768,
     ):
         super().__init__()
         self.model_name = "dkt"

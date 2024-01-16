@@ -77,15 +77,14 @@ class SAKT(Module):
 
     def forward(self, q, r, qry, qtest=False):
         emb_type = self.emb_type
-        qemb, qshftemb, xemb = None, None, None
+        qshftemb, xemb = None, None
         if emb_type == "qid":
             qshftemb, xemb = self.base_emb(q, r, qry)
 
         for i in range(self.num_en):
             xemb = self.blocks[i](qshftemb, xemb, xemb)
 
-        p = torch.sigmoid(self.pred(self.dropout_layer(xemb))).squeeze(-1)
+        out = torch.sigmoid(self.pred(self.dropout_layer(xemb))).squeeze(-1)
         if not qtest:
-            return p
-        else:
-            return p, xemb
+            return out
+        return out, xemb

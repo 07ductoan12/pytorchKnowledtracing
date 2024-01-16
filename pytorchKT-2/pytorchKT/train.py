@@ -1,23 +1,23 @@
-import os, sys
-import argparse
+import os
+import sys
 import json
+import copy
+import datetime
 
 import torch
 
 torch.set_num_threads(4)
 from torch.optim import SGD, Adam
-import copy
 from pytorchKT.models import train_model, init_model
 from pytorchKT.datasets.create_dataloader import init_dataset4train
 from pytorchKT.utils import debug_print
-import datetime
 from pytorchKT.arguments import get_train_arguments
 
-device = "cpu" if not torch.cuda.is_available() else "cuda"
+DEVICE = "cpu" if not torch.cuda.is_available() else "cuda"
 
 
 def save_config(train_config, model_config, data_config, params, save_dir):
-    d = {
+    data = {
         "train_config": train_config,
         "model_config": model_config,
         "data_config": data_config,
@@ -25,7 +25,7 @@ def save_config(train_config, model_config, data_config, params, save_dir):
     }
     save_path = os.path.join(save_dir, "config.json")
     with open(save_path, "w", encoding="utf-8") as fout:
-        json.dump(d, fout)
+        json.dump(data, fout)
 
 
 def train():
@@ -41,8 +41,8 @@ def train():
 
     debug_print(text="load config files.", fuc_name="main")
 
-    with open("./pytorchKT/configs/kt_config.json", encoding="utf-8") as f:
-        config = json.load(f)
+    with open("./pytorchKT/configs/kt_config.json", encoding="utf-8") as file:
+        config = json.load(file)
         train_config = config["train_config"]
         keys = config[model_name].keys()
         if model_name in ["sakt"]:
@@ -73,7 +73,7 @@ def train():
         train_config["optimizer"],
     )
 
-    with open("./pytorchKT/configs/data_config.json") as fin:
+    with open("./pytorchKT/configs/data_config.json", encoding="utf-8") as fin:
         data_config = json.load(fin)
 
     if "maxlen" in data_config[dataset_name]:  # prefer to use the maxlen in data config
@@ -125,7 +125,7 @@ def train():
     print(f"model is {model}")
     if optimizer == "sgd":
         opt = SGD(model.parameters(), learning_rate, momentum=0.9)
-    elif optimizer == "adam":
+    else:
         opt = Adam(model.parameters(), learning_rate)
 
     testauc, testacc = -1, -1
@@ -185,6 +185,7 @@ def train():
         + "\t"
         + str(best_epoch)
     )
+
     save_config(
         train_config,
         model_config,

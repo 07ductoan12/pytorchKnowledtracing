@@ -42,10 +42,10 @@ set_model_args() {
     MODEL_ARGS=( "${COMMON_ARGS[@]}" "${MODEL_ARGS[@]}" )
 }
 
-ACTION="eval"
+ACTION="train"
 
 if [ "$ACTION" == "train" ]; then
-    MODEL_NAME="dkt+"
+    MODEL_NAME="dkt"
     DATASET_NAME="ednet"
     set_model_args
 else
