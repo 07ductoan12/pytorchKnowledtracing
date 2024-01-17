@@ -24,8 +24,8 @@ set_model_args() {
         )
     elif [ "$MODEL_NAME" == "dkvmn" ]; then
         MODEL_ARGS=(
-            "--dim_s" "200"
-            "--size_m" "32"
+            "--dim_s" "128"
+            "--size_m" "64"
         )
     elif [ "$MODEL_NAME" == "dkt+" ]; then
         MODEL_ARGS=(
@@ -33,7 +33,13 @@ set_model_args() {
             "--lambda_r" "1e-3"
             "--lambda_w1" "0.003"
             "--lambda_w2" "3.0"
-    )
+        )
+    elif [ "$MODEL_NAME" == "sakt" ]; then
+        MODEL_ARGS=(
+            "--emb_size" "256"
+            "--num_attn_heads" "8"
+            "--num_en" "1"
+        )
     else
         echo "Invalid input. Exiting script."
         exit 1
@@ -45,12 +51,12 @@ set_model_args() {
 ACTION="train"
 
 if [ "$ACTION" == "train" ]; then
-    MODEL_NAME="dkt"
-    DATASET_NAME="ednet"
+    MODEL_NAME="sakt"
+    DATASET_NAME="assist2009"
     set_model_args
 else
     MODEL_ARGS=(
-        "--save_dir" "./saved_model/train_dkt+_ednet_qid_saved_model_42_0_0.2_256_0.001_0.001_0.003_3.0/"
+        "--save_dir" "./saved_model/train_dimkt_assist2009_qid_saved_model_42_0_0.2_0.001_256_64_199_100"
         "--test_filename" "test.csv"
         "--use_pred" "0"
         "--train_ratio" "0.9"
@@ -59,7 +65,7 @@ else
 fi
 
 if [ "$ACTION" == "train" ]; then
-    python3 "$SCRIPT_PATH" "$ACTION" "$MODEL_NAME" "${ARGS[@]}"
+    python3 "$SCRIPT_PATH" "$ACTION" "$MODEL_NAME" "${MODEL_ARGS[@]}"
 else
     python3 "$SCRIPT_PATH" "$ACTION" "${MODEL_ARGS[@]}"
 fi

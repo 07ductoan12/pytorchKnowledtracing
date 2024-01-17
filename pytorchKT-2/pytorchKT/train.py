@@ -16,12 +16,13 @@ from pytorchKT.arguments import get_train_arguments
 DEVICE = "cpu" if not torch.cuda.is_available() else "cuda"
 
 
-def save_config(train_config, model_config, data_config, params, save_dir):
+def save_config(train_config, model_config, data_config, params, results, save_dir):
     data = {
         "train_config": train_config,
         "model_config": model_config,
         "data_config": data_config,
         "params": params,
+        "results": results,
     }
     save_path = os.path.join(save_dir, "config.json")
     with open(save_path, "w", encoding="utf-8") as fout:
@@ -186,11 +187,14 @@ def train():
         + str(best_epoch)
     )
 
+    resutls = {"validauc": validauc, "validacc": validacc}
+
     save_config(
         train_config,
         model_config,
         data_config[dataset_name],
         params,
+        resutls,
         save_dir=ckpt_path,
     )
     print(f"end:{datetime.datetime.now()}")

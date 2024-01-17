@@ -1,7 +1,9 @@
+import os
 import numpy as np
 from typing import Tuple, List, Dict
 import torch
 import torch.nn as nn
+import csv
 from torch.nn.functional import one_hot
 from sklearn import metrics
 import pandas as pd
@@ -1398,6 +1400,58 @@ def evaluate_splitpred_question(
                 [] if "timestamps" not in row else row["timestamps"].split(",")
             )  # danh sách thời gian phản hồi của người dùng
 
+            if model_name == "dimkt":
+                sds = {}
+                qds = {}
+                with open(
+                    os.path.join(
+                        data_config["dpath"],
+                        f"skills_difficult_{model.difficult_levels}.csv",
+                    ),
+                    "r",
+                    encoding="utf-8",
+                ) as file:
+                    reader = csv.reader(file)
+                    sds_keys = next(reader)
+                    sds_vals = next(reader)
+                    for i, sds_key in enumerate(sds_keys):
+                        sds[int(sds_key)] = int(sds_vals[i])
+
+                with open(
+                    os.path.join(
+                        data_config["dpath"],
+                        f"questions_difficult_{model.difficult_levels}.csv",
+                    ),
+                    "r",
+                    encoding="utf-8",
+                ) as file:
+                    reader = csv.reader(file)
+                    qds_keys = next(reader)
+                    qds_vals = next(reader)
+                    for i, qds_key in enumerate(qds_keys):
+                        qds[int(qds_key)] = int(qds_vals[i])
+                sds_keys = [int(_) for _ in sds_keys]
+                qds_keys = [int(_) for _ in qds_keys]
+
+                seq_sds, seq_qds = [], []
+                temp = [int(_) for _ in row["concepts"].split(",")]
+                for j in temp:
+                    if j == -1:
+                        seq_sds.append(-1)
+                    elif j not in sds_keys:
+                        seq_sds.append(1)
+                    else:
+                        seq_sds.append(int(sds[j]))
+
+                temp = [int(_) for _ in row["questions"].split(",")]
+                for j in temp:
+                    if j == -1:
+                        seq_qds.append(-1)
+                    elif j not in qds_keys:
+                        seq_qds.append(1)
+                    else:
+                        seq_qds.append(int(qds[j]))
+
             qlen, qtrainlen, ctrainlen = get_cur_teststart(is_repeat, train_ratio)
             cq = torch.tensor([int(s) for s in questions]).to(device)
             cc = torch.tensor([int(s) for s in concepts]).to(device)
@@ -1409,12 +1463,22 @@ def evaluate_splitpred_question(
 
             curqin = cq[0:ctrainlen].unsqueeze(0) if cq.shape[0] > 0 else cq
             curtin = ct[0:ctrainlen].unsqueeze(0) if ct.shape[0] > 0 else ct
+            if model_name == "dimkt":
+                csd = torch.tensor(seq_sds).to(device)
+                cqd = torch.tensor(seq_qds).to(device)
+                dtotal["csd"] = csd
+                dtotal["cqd"] = cqd
+                cursdin = csd[0:ctrainlen].unsqueeze(0) if csd.shape[0] > 0 else csd
+                curqdin = cqd[0:ctrainlen].unsqueeze(0) if cqd.shape[0] > 0 else cqd
             dcur = {
                 "curqin": curqin,
                 "curcin": curcin,
                 "currin": currin,
                 "curtin": curtin,
             }
+            if model_name == "dimkt":
+                dcur["cursdin"] = cursdin
+                dcur["curqdin"] = curqdin
 
             curdforget = dict()
             for key, values in dforget.items():
@@ -1457,37 +1521,71 @@ def evaluate_splitpred_question(
 
                     end = rtmp[-1] + 1
                     uid = row["uid"]
-
-                    (
-                        curqin,
-                        curcin,
-                        currin,
-                        curtin,
-                        curdforget,
-                        ctrues,
-                        cpreds,
-                    ) = predict_each_group(
-                        dtotal,
-                        dcur,
-                        dforget,
-                        curdforget,
-                        is_repeat,
-                        qidx,
-                        uid,
-                        idx,
-                        model_name,
-                        model,
-                        t,
-                        end,
-                        fout,
-                        atkt_pad,
-                    )
-                    dcur = {
-                        "curqin": curqin,
-                        "curcin": curcin,
-                        "currin": currin,
-                        "curtin": curtin,
-                    }
+                    if model_name == "dimkt":
+                        (
+                            curqin,
+                            curcin,
+                            currin,
+                            curtin,
+                            cursdin,
+                            curqdin,
+                            ctrues,
+                            cpreds,
+                        ) = predict_each_group(
+                            dtotal,
+                            dcur,
+                            dforget,
+                            curdforget,
+                            is_repeat,
+                            qidx,
+                            uid,
+                            idx,
+                            model_name,
+                            model,
+                            t,
+                            end,
+                            fout,
+                            atkt_pad,
+                        )
+                        dcur = {
+                            "curqin": curqin,
+                            "curcin": curcin,
+                            "currin": currin,
+                            "curtin": curtin,
+                            "cursdin": cursdin,
+                            "curqdin": curqdin,
+                        }
+                    else:
+                        (
+                            curqin,
+                            curcin,
+                            currin,
+                            curtin,
+                            curdforget,
+                            ctrues,
+                            cpreds,
+                        ) = predict_each_group(
+                            dtotal,
+                            dcur,
+                            dforget,
+                            curdforget,
+                            is_repeat,
+                            qidx,
+                            uid,
+                            idx,
+                            model_name,
+                            model,
+                            t,
+                            end,
+                            fout,
+                            atkt_pad,
+                        )
+                        dcur = {
+                            "curqin": curqin,
+                            "curcin": curcin,
+                            "currin": currin,
+                            "curtin": curtin,
+                        }
 
                     late_mean, late_vote, late_all = save_each_question_res(
                         dcres, dqres, ctrues, cpreds
