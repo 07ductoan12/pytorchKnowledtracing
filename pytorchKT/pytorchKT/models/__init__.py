@@ -1,11 +1,10 @@
-from .DKT import DKT
-from .utils import ScheduledOptim, NoamOpt, get_pad_mask, get_subsequent_mask, clones
+from .utils import train_model, evaluate, evaluate_splitpred_question
+from .init_model import init_model, load_model
 
 __all__ = [
-    "DKT",
-    "ScheduledOptim",
-    "NoamOpt",
-    "get_pad_mask",
-    "get_subsequent_mask",
-    "clones",
+    "train_model",
+    "evaluate",
+    "init_model",
+    "evaluate_splitpred_question",
+    "load_model",
 ]

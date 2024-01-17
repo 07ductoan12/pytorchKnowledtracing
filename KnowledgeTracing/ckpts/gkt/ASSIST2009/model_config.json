@@ -1,5 +1,0 @@
-{
-    "hidden_size": 30,
-    "num_attn_heads": 2,
-    "method": "MHA"
-}

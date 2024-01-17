@@ -1,7 +1,0 @@
-{
-    "emb_size": 100,
-    "hidden_size": 100,
-    "lambda_r": 0.01,
-    "lambda_w1": 0.05,
-    "lambda_w2": 0.01
-}
