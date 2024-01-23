@@ -2,7 +2,8 @@ import os
 import json
 import copy
 
-from pytorchKT.models import evaluate_splitpred_question, load_model
+from pytorchKT.models import load_model
+from pytorchKT.models.utils import evaluate_splitpred_question, eval_kcs
 from pytorchKT.arguments import get_eval_argments
 
 
@@ -17,6 +18,9 @@ def eval():
         params["use_pred"],
         params["train_ratio"],
     )
+
+    # save_dir = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/saved_model/train_dkvmn_assist2009_qid_saved_model_42_0_0.2_0.001_128_64"
+    save_dir = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/saved_model/train_dimkt_assist2009_qid_saved_model_42_0_0.2_0.001_256_64_199_100"
 
     with open(os.path.join(save_dir, "config.json"), encoding="utf-8") as fin:
         config = json.load(fin)
@@ -68,12 +72,11 @@ def eval():
             + str(ratio)
             + "_"
             + str(use_pred)
-            + "_predictions.txt",
+            + "_predictions_kcs.txt",
         )
     testf = os.path.join(data_config["dpath"], params["test_filename"])
-    dfinal = evaluate_splitpred_question(
-        model, data_config, testf, model_name, save_test_path, use_pred, ratio, atkt_pad
-    )
-    for key, values in dfinal.items():
-        print(key, values)
-    dfinal.update(config["params"])
+    # dfinal = evaluate_splitpred_question(
+    #     model, data_config, testf, model_name, save_test_path, use_pred, ratio, atkt_pad
+    # )
+
+    eval_kcs(model, data_config, testf, model_name, save_test_path)

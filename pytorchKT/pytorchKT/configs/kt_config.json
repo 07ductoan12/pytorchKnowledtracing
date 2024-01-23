@@ -102,5 +102,8 @@
     },
     "dimkt": {
         "dropout": 0.2
+    },
+    "dimkt_cc": {
+        "dropout": 0.2
     }
 }

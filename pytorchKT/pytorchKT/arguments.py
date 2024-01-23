@@ -21,13 +21,22 @@ def get_train_arguments():
     parser.add_argument(
         "model_name",
         type=str,
-        default="dkvmn",
-        choices=["dkt", "sakt", "dkvmn", "dimkt", "dkt+"],
+        default="dimkt_cc",
+        choices=[
+            "dkt",
+            "sakt",
+            "dkvmn",
+            "dimkt",
+            "dkt+",
+            "dimkt_cc",
+            "deep_irt",
+            "hawkes",
+        ],
     )
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="assist2015",
+        default="assist2009",
         choices=["assist2015", "assist2009", "ednet", "junyi"],
     )
     parser.add_argument("--emb_type", type=str, default="qid")
@@ -37,8 +46,8 @@ def get_train_arguments():
     parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--learning_rate", type=float, default=1e-3)
 
-    if model_name == "dimkt":
-        parser.add_argument("--emb_size", type=int, default=128)
+    if model_name in ["dimkt", "dimkt_cc"]:
+        parser.add_argument("--emb_size", type=int, default=512)
         parser.add_argument("--batch_size", type=int, default=64)
         parser.add_argument("--num_steps", type=int, default=199)
         parser.add_argument("--difficult_levels", type=int, default=100)
@@ -56,6 +65,14 @@ def get_train_arguments():
         parser.add_argument("--emb_size", type=int, default=256)
         parser.add_argument("--num_attn_heads", type=int, default=8)
         parser.add_argument("--num_en", type=int, default=1)
+    elif model_name == "deep_irt":
+        parser.add_argument("--dim_s", type=int, default=200)
+        parser.add_argument("--size_m", type=int, default=50)
+        parser.add_argument("--emb_size", type=int, default=256)
+    elif model_name == "hawkes":
+        parser.add_argument("--emb_size", type=int, default=64)
+        parser.add_argument("--time_log", type=int, default=5)
+        parser.add_argument("--l2", type=float, default=1e-5)
     else:
         exit()
 

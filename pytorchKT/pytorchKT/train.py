@@ -8,7 +8,8 @@ import torch
 
 torch.set_num_threads(4)
 from torch.optim import SGD, Adam
-from pytorchKT.models import train_model, init_model
+from pytorchKT.models import init_model
+from pytorchKT.models.utils import train_model
 from pytorchKT.datasets.create_dataloader import init_dataset4train
 from pytorchKT.utils import debug_print
 from pytorchKT.arguments import get_train_arguments
@@ -42,17 +43,22 @@ def train():
 
     debug_print(text="load config files.", fuc_name="main")
 
-    with open("./pytorchKT/configs/kt_config.json", encoding="utf-8") as file:
+    with open(
+        "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/pytorchKT/configs/kt_config.json",
+        encoding="utf-8",
+    ) as file:
         config = json.load(file)
         train_config = config["train_config"]
-        keys = config[model_name].keys()
+        model_config = copy.deepcopy(params)
+        try:
+            keys = config[model_name].keys()
+            for key in keys:
+                if not key in model_config.keys():
+                    model_config[key] = config[model_name][key]
+        except:
+            pass
         if model_name in ["sakt"]:
             train_config["batch_size"] = 64  ## because of OOM
-        model_config = copy.deepcopy(params)
-
-        for key in keys:
-            if not key in model_config.keys():
-                model_config[key] = config[model_name][key]
 
         for key in [
             "model_name",
@@ -74,7 +80,10 @@ def train():
         train_config["optimizer"],
     )
 
-    with open("./pytorchKT/configs/data_config.json", encoding="utf-8") as fin:
+    with open(
+        "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/pytorchKT/configs/data_config.json",
+        encoding="utf-8",
+    ) as fin:
         data_config = json.load(fin)
 
     if "maxlen" in data_config[dataset_name]:  # prefer to use the maxlen in data config
@@ -85,7 +94,7 @@ def train():
     print(dataset_name, model_name, data_config[dataset_name], fold, batch_size)
 
     debug_print(text="init_dataset", fuc_name="main")
-    if model_name not in ["dimkt"]:
+    if model_name not in ["dimkt", "dimkt_cc"]:
         train_loader, valid_loader, *_ = init_dataset4train(
             dataset_name, model_name, data_config, fold, batch_size
         )

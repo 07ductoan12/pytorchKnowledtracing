@@ -2,6 +2,7 @@ import sys
 from pytorchKT import train, eval
 
 if __name__ == "__main__":
+    # sys.argv = ["main.py", "train", "rkt", "--dataset_name", "ednet"]
     if sys.argv[1] == "train":
         print(f"Start TRAIN {sys.argv[2]} process...\n")
         train()

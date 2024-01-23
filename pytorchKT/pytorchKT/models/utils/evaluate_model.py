@@ -17,7 +17,7 @@ from .utils import (
 
 que_type_models = []
 
-device = "cpu" if not torch.cuda.is_available() else "cuda"
+DEVICE = "cpu" if not torch.cuda.is_available() else "cuda"
 
 
 def evaluate(model, test_loader, model_name, rel=None, save_path=""):
@@ -33,7 +33,7 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
                 dcur, dgaps = data
             else:
                 dcur = data
-            if model_name in ["dimkt"]:
+            if model_name in ["dimkt", "dimkt_cc"]:
                 q, c, r, sd, qd = (
                     dcur["qseqs"],
                     dcur["cseqs"],
@@ -49,10 +49,10 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
                     dcur["shft_qdseqs"],
                 )
                 sd, qd, sdshft, qdshft = (
-                    sd.to(device),
-                    qd.to(device),
-                    sdshft.to(device),
-                    qdshft.to(device),
+                    sd.to(DEVICE),
+                    qd.to(DEVICE),
+                    sdshft.to(DEVICE),
+                    qdshft.to(DEVICE),
                 )
             else:
                 q, c, r = dcur["qseqs"], dcur["cseqs"], dcur["rseqs"]
@@ -63,22 +63,16 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
                 )
             m, sm = dcur["masks"], dcur["smasks"]
             q, c, r, qshft, cshft, rshft, m, sm = (
-                q.to(device),
-                c.to(device),
-                r.to(device),
-                qshft.to(device),
-                cshft.to(device),
-                rshft.to(device),
-                m.to(device),
-                sm.to(device),
+                q.to(DEVICE),
+                c.to(DEVICE),
+                r.to(DEVICE),
+                qshft.to(DEVICE),
+                cshft.to(DEVICE),
+                rshft.to(DEVICE),
+                m.to(DEVICE),
+                sm.to(DEVICE),
             )
-            if model.model_name in que_type_models and model_name not in [
-                "lpkt",
-                "rkt",
-            ]:
-                model.model.eval()
-            else:
-                model.eval()
+            model.eval()
 
             # print(f"before y: {y.shape}")
             cq = torch.cat((q[:, 0:1], qshft), dim=1)
@@ -119,30 +113,9 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
             elif model_name == "saint":
                 y = model(cq.long(), cc.long(), r.long())
                 y = y[:, 1:]
-            elif model_name in [
-                "akt",
-                "akt_vector",
-                "akt_norasch",
-                "akt_mono",
-                "akt_attn",
-                "aktattn_pos",
-                "aktmono_pos",
-                "akt_raschx",
-                "akt_raschy",
-                "aktvec_raschx",
-            ]:
-                y, reg_loss = model(cc.long(), cr.long(), cq.long())
-                y = y[:, 1:]
             elif model_name in ["atkt", "atktfix"]:
                 y, _ = model(c.long(), r.long())
                 y = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
-            elif model_name == "gkt":
-                y = model(cc.long(), cr.long())
-            elif model_name == "lpkt":
-                cit = torch.cat((dcur["itseqs"][:, 0:1], dcur["shft_itseqs"]), dim=1)
-                y = model(cq.long(), cr.long(), cit.long())
-                y = y[:, 1:]
-                c, cshft = q, qshft  # question level
             elif model_name == "hawkes":
                 ct = torch.cat((dcur["tseqs"][:, 0:1], dcur["shft_tseqs"]), dim=1)
                 y = model(cc.long(), cq.long(), ct.long(), cr.long())  # , csm.long())
@@ -161,6 +134,14 @@ def evaluate(model, test_loader, model_name, rel=None, save_path=""):
                     cshft.long(),
                     sdshft.long(),
                     qdshft.long(),
+                )
+            elif model_name in ["dimkt_cc"]:
+                y = model(
+                    c.long(),
+                    sd.long(),
+                    r.long(),
+                    cshft.long(),
+                    sdshft.long(),
                 )
             # save predict result
             if save_path != "":
@@ -256,7 +237,7 @@ def effective_fusion(df: pd.DataFrame, model, model_name, fusion_type):
 
     if "early_fusion" in fusion_type and model_name in hasearly:
         curhs = [torch.tensor(curh).float().cpu() for curh in curhs]
-        curr = torch.tensor(curr).long().to(device)
+        curr = torch.tensor(curr).long().to(DEVICE)
 
         p = early_fusion(curhs, model, model_name)
         dres.setdefault("early_trues", [])
@@ -424,14 +405,14 @@ def evaluate_question(
 
             m, sm = dcurori["masks"], dcurori["smasks"]
             q, c, r, qshft, cshft, rshft, m, sm = (
-                q.to(device),
-                c.to(device),
-                r.to(device),
-                qshft.to(device),
-                cshft.to(device),
-                rshft.to(device),
-                m.to(device),
-                sm.to(device),
+                q.to(DEVICE),
+                c.to(DEVICE),
+                r.to(DEVICE),
+                qshft.to(DEVICE),
+                cshft.to(DEVICE),
+                rshft.to(DEVICE),
+                m.to(DEVICE),
+                sm.to(DEVICE),
             )
             qidxs, rests, orirow = dqtest["qidxs"], dqtest["rests"], dqtest["orirow"]
             lenc += q.shape[0]
@@ -639,9 +620,9 @@ def prepare_data(
             start = cinlen - maxlen + 1
 
         curc, curr = cc.long()[k], cr.long()[k]
-        curc, curr = torch.tensor([[curc.item()]]).to(device), torch.tensor(
+        curc, curr = torch.tensor([[curc.item()]]).to(DEVICE), torch.tensor(
             [[curr.item()]]
-        ).to(device)
+        ).to(DEVICE)
         dcs.append(curcin[:, start:])
         drs.append(currin[:, start:])
 
@@ -652,14 +633,14 @@ def prepare_data(
         drshfts.append(curr)
         if cq.shape[0] > 0:
             curq = cq.long()[k]
-            curq = torch.tensor([[curq.item()]]).to(device)
+            curq = torch.tensor([[curq.item()]]).to(DEVICE)
 
             dqs.append(curqin[:, start:])
             curq = torch.cat((curqin[:, start + 1 :], curq), axis=1)
             dqshfts.append(curq)
         if ct.shape[0] > 0:
             curt = ct.long()[k]
-            curt = torch.tensor([[curt.item()]]).to(device)
+            curt = torch.tensor([[curt.item()]]).to(DEVICE)
 
             dts.append(curtin[:, start:])
             curt = torch.cat((curtin[:, start + 1 :], curt), axis=1)
@@ -667,16 +648,16 @@ def prepare_data(
         if model_name == "lpkt":
             if cit.shape[0] > 0:
                 curit = cit.long()[k]
-                curit = torch.tensor([[curit.item()]]).to(device)
+                curit = torch.tensor([[curit.item()]]).to(DEVICE)
 
                 dits.append(curitin[:, start:])
                 curit = torch.cat((curitin[:, start + 1 :], curit), axis=1)
                 ditshfts.append(curit)
         elif model_name == "dimkt":
             cursd = csd.long()[k]
-            cursd = torch.tensor([[cursd.item()]]).to(device)
+            cursd = torch.tensor([[cursd.item()]]).to(DEVICE)
             curqd = cqd.long()[k]
-            curqd = torch.tensor([[curqd.item()]]).to(device)
+            curqd = torch.tensor([[curqd.item()]]).to(DEVICE)
 
             dsds.append(cursdin[:, start:])
             cursd = torch.cat((cursdin[:, start + 1 :], cursd), axis=1)
@@ -693,7 +674,7 @@ def prepare_data(
                 dds.setdefault(key, [])
                 dds[key].append(d[key])
             for key in dforget:
-                curd = torch.tensor([[dforget[key][k]]]).long().to(device)
+                curd = torch.tensor([[dforget[key][k]]]).long().to(DEVICE)
                 dshft[key] = torch.cat((d[key][:, 1:], curd), axis=1)
                 ddshfts.setdefault(key, [])
                 ddshfts[key].append(dshft[key])
@@ -877,6 +858,7 @@ def predict_each_group2(
     bidx, bz = 0, 128
     while bidx < finalcs.shape[0]:
         curc, curr = finalcs[bidx : bidx + bz], finalrs[bidx : bidx + bz]
+        print(curc)
         curcshft, currshft = (
             finalcshfts[bidx : bidx + bz],
             finalrshfts[bidx : bidx + bz],
@@ -914,6 +896,8 @@ def predict_each_group2(
             ccq = torch.cat((curq[:, 0:1], curqshft), dim=1)
             ccc = torch.cat((curc[:, 0:1], curcshft), dim=1)
             ccr = torch.cat((curr[:, 0:1], currshft), dim=1)
+            print(ccc)
+            print(ccr)
             cct = torch.cat((curt[:, 0:1], curtshft), dim=1)
         if model_name in ["dkt_forget", "bakt_time"]:
             dgaps = dict()
@@ -1085,7 +1069,7 @@ def predict_each_group(
                 din[key] = curdforget[key][:, start:]
             dcur = dict()
             for key in dforget:
-                curd = torch.tensor([[dforget[key][k]]]).long().to(device)
+                curd = torch.tensor([[dforget[key][k]]]).long().to(DEVICE)
                 dcur[key] = torch.cat((din[key][:, 1:], curd), axis=1)
             dgaps = dict()
             for key, values in din.items():
@@ -1106,15 +1090,15 @@ def predict_each_group(
             y = model(cin.long(), rin.long(), dgaps)
             pred = y[0][-1][cout.item()]
         elif model_name in ["kqn", "sakt"]:
-            curc = torch.tensor([[cout.item()]]).to(device)
+            curc = torch.tensor([[cout.item()]]).to(DEVICE)
             cshft = torch.cat((cin[:, 1:], curc), axis=1)
             y = model(cin.long(), rin.long(), cshft.long())
             pred = y[0][-1]
         elif model_name == "saint":
             if qout is not None:
-                curq = torch.tensor([[qout.item()]]).to(device)
+                curq = torch.tensor([[qout.item()]]).to(DEVICE)
                 qin = torch.cat((qin, curq), axis=1)
-            curc = torch.tensor([[cout.item()]]).to(device)
+            curc = torch.tensor([[cout.item()]]).to(DEVICE)
             cin = torch.cat((cin, curc), axis=1)
 
             y = model(qin.long(), cin.long(), rin.long())
@@ -1124,7 +1108,7 @@ def predict_each_group(
                 oricinlen = cin.shape[1]
                 padlen = maxlen - 1 - oricinlen
                 # print(f"padlen: {padlen}, cin: {cin.shape}")
-                pad = torch.tensor([0] * (padlen)).unsqueeze(0).to(device)
+                pad = torch.tensor([0] * (padlen)).unsqueeze(0).to(DEVICE)
                 # curc = torch.tensor([[cout.item()]]).to(device)
                 # cshft = torch.cat((cin[:,1:],curc), axis=1)
                 cin = torch.cat((cin, pad), axis=1)
@@ -1137,9 +1121,9 @@ def predict_each_group(
             else:
                 pred = y[0][-1][cout.item()]
         elif model_name in ["dkvmn", "deep_irt", "skvmn"]:
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[true.item()]]
-            ).to(device)
+            ).to(DEVICE)
             cin, rin = torch.cat((cin, curc), axis=1), torch.cat((rin, curr), axis=1)
             # print(f"cin: {cin.shape}, curc: {curc.shape}")
             y = model(cin.long(), rin.long())
@@ -1157,25 +1141,25 @@ def predict_each_group(
             "aktvec_raschx",
         ]:
             if qout is not None:
-                curq = torch.tensor([[qout.item()]]).to(device)
+                curq = torch.tensor([[qout.item()]]).to(DEVICE)
                 qin = torch.cat((qin, curq), axis=1)
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             cin, rin = torch.cat((cin, curc), axis=1), torch.cat((rin, curr), axis=1)
 
             y, reg_loss = model(cin.long(), rin.long(), qin.long())
             pred = y[0][-1]
         elif model_name in ["bakt_time"]:
             if qout is not None:
-                curq = torch.tensor([[qout.item()]]).to(device)
+                curq = torch.tensor([[qout.item()]]).to(DEVICE)
                 qinshft = torch.cat((qin[:, 1:], curq), axis=1)
             else:
-                qin = torch.tensor([[]]).to(device)
-                qinshft = torch.tensor([[]]).to(device)
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+                qin = torch.tensor([[]]).to(DEVICE)
+                qinshft = torch.tensor([[]]).to(DEVICE)
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             cinshft, rinshft = torch.cat((cin[:, 1:], curc), axis=1), torch.cat(
                 (rin[:, 1:], curr), axis=1
             )
@@ -1192,14 +1176,14 @@ def predict_each_group(
             pred = y[0][-1]
         elif model_name in ["simplekt", "sparsekt"]:
             if qout is not None:
-                curq = torch.tensor([[qout.item()]]).to(device)
+                curq = torch.tensor([[qout.item()]]).to(DEVICE)
                 qinshft = torch.cat((qin[:, 1:], curq), axis=1)
             else:
-                qin = torch.tensor([[]]).to(device)
-                qinshft = torch.tensor([[]]).to(device)
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+                qin = torch.tensor([[]]).to(DEVICE)
+                qinshft = torch.tensor([[]]).to(DEVICE)
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             cinshft, rinshft = torch.cat((cin[:, 1:], curc), axis=1), torch.cat(
                 (rin[:, 1:], curr), axis=1
             )
@@ -1216,11 +1200,11 @@ def predict_each_group(
             pred = y[0][-1]
         elif model_name == "lpkt":
             if itout is not None:
-                curit = torch.tensor([[itout.item()]]).to(device)
+                curit = torch.tensor([[itout.item()]]).to(DEVICE)
                 itin = torch.cat((itin, curit), axis=1)
-            curq, curr = torch.tensor([[qout.item()]]).to(device), torch.tensor(
+            curq, curr = torch.tensor([[qout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             # curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor([[true.item()]]).to(device)
             qin, rin = torch.cat((qin, curq), axis=1), torch.cat((rin, curr), axis=1)
             y = model(qin.long(), rin.long(), itin.long())
@@ -1230,14 +1214,14 @@ def predict_each_group(
             pred = y[0][-1]
         elif model_name == "dimkt":
             if sdout is not None and qdout is not None:
-                cursd = torch.tensor([[sdout.item()]]).to(device)
+                cursd = torch.tensor([[sdout.item()]]).to(DEVICE)
                 # sdin = torch.cat((sdin, cursd), axis=1)
-                curqd = torch.tensor([[qdout.item()]]).to(device)
+                curqd = torch.tensor([[qdout.item()]]).to(DEVICE)
                 # qdin = torch.cat((qdin, curqd), axis=1)
             curq, curc, curr = (
-                torch.tensor([[qout.item()]]).to(device),
-                torch.tensor([[cout.item()]]).to(device),
-                torch.tensor([[1]]).to(device),
+                torch.tensor([[qout.item()]]).to(DEVICE),
+                torch.tensor([[cout.item()]]).to(DEVICE),
+                torch.tensor([[1]]).to(DEVICE),
             )
             # qin, cin, rin = torch.cat((qin, curq), axis=1), torch.cat((cin, curc), axis=1), torch.cat((rin, curr), axis=1)
             qinshft, cinshft, rinshft, sdinshft, qdinshft = (
@@ -1262,35 +1246,35 @@ def predict_each_group(
             )
             pred = y[0][-1]
         elif model_name == "gkt":
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             cin, rin = torch.cat((cin, curc), axis=1), torch.cat((rin, curr), axis=1)
             y = model(cin.long(), rin.long())
             # print(f"y.shape is {y.shape},cin shape is {cin.shape}")
             pred = y[0][-1]
         elif model_name == "hawkes":
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             if tout is not None:
-                curt = torch.tensor([[tout.item()]]).to(device)
+                curt = torch.tensor([[tout.item()]]).to(DEVICE)
                 tin = torch.cat((tin, curt), axis=1)
             else:
-                tin = torch.tensor([[]]).to(device)
+                tin = torch.tensor([[]]).to(DEVICE)
             if qout is not None:
-                curq = torch.tensor([[qout.item()]]).to(device)
+                curq = torch.tensor([[qout.item()]]).to(DEVICE)
                 qin = torch.cat((qin, curq), axis=1)
-            curc, curr = torch.tensor([[cout.item()]]).to(device), torch.tensor(
+            curc, curr = torch.tensor([[cout.item()]]).to(DEVICE), torch.tensor(
                 [[1]]
-            ).to(device)
+            ).to(DEVICE)
             cin, rin = torch.cat((cin, curc), axis=1), torch.cat((rin, curr), axis=1)
             # print(f"cin: {cin.shape}, qin: {qin.shape}, tin: {tin.shape}, rin: {rin.shape}")
             y = model(cin.long(), qin.long(), tin.long(), rin.long())
             pred = y[0][-1]
 
         predl = 1 if pred.item() >= 0.5 else 0
-        cpred = torch.tensor([[predl]]).to(device)
+        cpred = torch.tensor([[predl]]).to(DEVICE)
 
         nextqin = cq[0 : k + 1].unsqueeze(0) if cq.shape[0] > 0 else qin
         nexttin = ct[0 : k + 1].unsqueeze(0) if ct.shape[0] > 0 else tin
@@ -1305,7 +1289,7 @@ def predict_each_group(
         # update nextdforget
         if model_name in ["dkt_forget", "bakt_time"]:
             for key in nextdforget:
-                curd = torch.tensor([[dforget[key][k]]]).long().to(device)
+                curd = torch.tensor([[dforget[key][k]]]).long().to(DEVICE)
                 nextdforget[key] = torch.cat((nextdforget[key], curd), axis=1)
         # print(f"bz: {bz}, t: {t}, pred: {pred}, true: {true}")
 
@@ -1453,10 +1437,10 @@ def evaluate_splitpred_question(
                         seq_qds.append(int(qds[j]))
 
             qlen, qtrainlen, ctrainlen = get_cur_teststart(is_repeat, train_ratio)
-            cq = torch.tensor([int(s) for s in questions]).to(device)
-            cc = torch.tensor([int(s) for s in concepts]).to(device)
-            cr = torch.tensor([int(s) for s in responses]).to(device)
-            ct = torch.tensor([int(s) for s in times]).to(device)
+            cq = torch.tensor([int(s) for s in questions]).to(DEVICE)
+            cc = torch.tensor([int(s) for s in concepts]).to(DEVICE)
+            cr = torch.tensor([int(s) for s in responses]).to(DEVICE)
+            ct = torch.tensor([int(s) for s in times]).to(DEVICE)
             dtotal = {"cq": cq, "cc": cc, "cr": cr, "ct": ct}
 
             curcin, currin = cc[0:ctrainlen].unsqueeze(0), cr[0:ctrainlen].unsqueeze(0)
@@ -1464,8 +1448,8 @@ def evaluate_splitpred_question(
             curqin = cq[0:ctrainlen].unsqueeze(0) if cq.shape[0] > 0 else cq
             curtin = ct[0:ctrainlen].unsqueeze(0) if ct.shape[0] > 0 else ct
             if model_name == "dimkt":
-                csd = torch.tensor(seq_sds).to(device)
-                cqd = torch.tensor(seq_qds).to(device)
+                csd = torch.tensor(seq_sds).to(DEVICE)
+                cqd = torch.tensor(seq_qds).to(DEVICE)
                 dtotal["csd"] = csd
                 dtotal["cqd"] = cqd
                 cursdin = csd[0:ctrainlen].unsqueeze(0) if csd.shape[0] > 0 else csd
@@ -1482,7 +1466,7 @@ def evaluate_splitpred_question(
 
             curdforget = dict()
             for key, values in dforget.items():
-                dforget[key] = torch.tensor(values).to(device)
+                dforget[key] = torch.tensor(values).to(DEVICE)
                 curdforget[key] = values[0:ctrainlen].unsqueeze(0)
 
             t = ctrainlen

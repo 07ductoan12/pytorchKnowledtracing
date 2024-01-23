@@ -12,7 +12,7 @@ def init_dataset4train(
     data_config = data_config[dataset_name]
     all_folds = set(data_config["folds"])
 
-    if model_name == "dimkt":
+    if model_name in ["dimkt", "dimkt_cc"]:
         curvalid = DIMKTDataset(
             data_config["dpath"],
             os.path.join(data_config["dpath"], data_config["train_valid_file"]),

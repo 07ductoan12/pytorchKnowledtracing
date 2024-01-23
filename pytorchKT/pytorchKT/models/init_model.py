@@ -1,7 +1,16 @@
 import os
 import sys
 import torch
-from pytorchKT.models.kc_models import DKT, SAKT, DKVMN, DIMKT, DKTPlus
+from pytorchKT.models.kc_models import (
+    DKT,
+    SAKT,
+    DKVMN,
+    DIMKT,
+    DKTPlus,
+    DIMKT_CC,
+    DeepIRT,
+    HawkesKT,
+)
 
 DEVICE = "cpu" if not torch.cuda.is_available() else "cuda"
 
@@ -53,6 +62,32 @@ def init_model(model_name, model_config, data_config, emb_type) -> torch.nn.Modu
             batch_size=model_config["batch_size"],
             num_steps=model_config["num_steps"],
             difficult_levels=model_config["difficult_levels"],
+            emb_type=emb_type,
+        ).to(DEVICE)
+    elif model_name == "dimkt_cc":
+        model = DIMKT_CC(
+            num_c=data_config["num_c"],
+            dropout=model_config["dropout"],
+            emb_size=model_config["emb_size"],
+            batch_size=model_config["batch_size"],
+            num_steps=model_config["num_steps"],
+            difficult_levels=model_config["difficult_levels"],
+            emb_type=emb_type,
+        ).to(DEVICE)
+    elif model_name == "deep_irt":
+        model = DeepIRT(
+            num_c=data_config["num_c"],
+            dim_s=model_config["dim_s"],
+            size_m=model_config["size_m"],
+            dropout=model_config["dropout"],
+            emb_type=emb_type,
+        ).to(DEVICE)
+    elif model_name == "hawkes":
+        model = HawkesKT(
+            n_skills=data_config["num_c"],
+            n_problems=data_config["num_q"],
+            emb_size=model_config["emb_size"],
+            time_log=model_config["time_log"],
             emb_type=emb_type,
         ).to(DEVICE)
     else:

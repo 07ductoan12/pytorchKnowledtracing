@@ -20,10 +20,21 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
         t = torch.masked_select(rshft, sm)
 
         loss = binary_cross_entropy(y.double(), t.double())
-    elif model_name in ["sakt", "dkvmn", "dimkt"]:
+    elif model_name in [
+        "sakt",
+        "dkvmn",
+        "dimkt",
+        "dimkt_cc",
+        "deep_irt",
+    ]:
         y = torch.masked_select(ys[0], sm)
         t = torch.masked_select(rshft, sm)
         loss = binary_cross_entropy(y.double(), t.double())
+    elif model_name == "hawkes":
+        y = ys[0].flatten()
+        t = rshft.flatten()
+        mask = y > -1
+        loss = nn.BCELoss(y[mask], t[mask])
     elif model_name in ["dkt+"]:
         y_curr = torch.masked_select(ys[1], sm)
         y_next = torch.masked_select(ys[0], sm)
@@ -55,7 +66,7 @@ def model_forward(model: nn.Module, data, rel=None):
     model_name = model.model_name
     dcur = data
 
-    if model_name in ["dimkt"]:
+    if model_name in ["dimkt", "dimkt_cc"]:
         q, c, r, t, sd, qd = (
             dcur["qseqs"].to(DEVICE),
             dcur["cseqs"].to(DEVICE),
@@ -91,6 +102,8 @@ def model_forward(model: nn.Module, data, rel=None):
     cq = torch.cat((q[:, 0:1], qshft), dim=1)
     cc = torch.cat((c[:, 0:1], cshft), dim=1)
     cr = torch.cat((r[:, 0:1], rshft), dim=1)
+    if model_name in ["hawkes"]:
+        ct = torch.cat((t[:, 0:1], tshft), dim=1)
 
     if model_name in ["dkt"]:
         y = model(c.long(), r.long())
@@ -99,10 +112,10 @@ def model_forward(model: nn.Module, data, rel=None):
     elif model_name in ["sakt"]:
         y = model(c.long(), r.long(), cshft.long())
         ys.append(y)
-    elif model_name in ["dkvmn"]:
+    elif model_name in ["dkvmn", "deep_irt"]:
         y = model(cc.long(), cr.long())
         ys.append(y[:, 1:])
-    elif model_name == "dimkt":
+    elif model_name in ["dimkt"]:
         y = model(
             q.long(),
             c.long(),
@@ -115,11 +128,23 @@ def model_forward(model: nn.Module, data, rel=None):
             qdshft.long(),
         )
         ys.append(y)
+    elif model_name in ["dimkt_cc"]:
+        y = model(
+            c.long(),
+            sd.long(),
+            r.long(),
+            cshft.long(),
+            sdshft.long(),
+        )
+        ys.append(y)
     elif model_name == "dkt+":
         y = model(c.long(), r.long())
         y_next = (y * one_hot(cshft.long(), model.num_c)).sum(-1)
         y_curr = (y * one_hot(c.long(), model.num_c)).sum(-1)
         ys = [y_next, y_curr, y]
+    elif model_name == "hawkes":
+        y = model(cc.long(), cq.long(), ct.long(), cr.long())  # , csm.long())
+        ys.append(y[:, 1:])
 
     loss = cal_loss(model, ys, r, rshft, sm, preloss)
     return loss
@@ -144,11 +169,11 @@ def train_model(
         for data in train_loader:
             train_step += 1
             model.train()
+
             loss = model_forward(model, data)
             opt.zero_grad()
             loss.backward()  # compute gradients
-            if model.model_name == "rkt":
-                clip_grad_norm_(model.parameters(), model.grad_clip)
+
             opt.step()  # update model’s parameters
 
             loss_mean.append(loss.detach().cpu().numpy())
