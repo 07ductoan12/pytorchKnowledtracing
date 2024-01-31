@@ -21,7 +21,11 @@ def predict_each_kc(dcur, model_name, model):
         curqd = dcur["curqd"]
         curqdshft = dcur["curqdshft"]
         curqshft = dcur["curqshft"]
-
+    elif model_name == "dimkt_cc":
+        ccc = curc
+        ccr = curr
+        cursd = dcur["cursd"]
+        cursdshft = dcur["cursdshft"]
     else:
         ccc = torch.cat((curc[:, 0:1], curcshft), dim=1)
         ccr = torch.cat((curr[:, 0:1], currshft), dim=1)
@@ -45,6 +49,15 @@ def predict_each_kc(dcur, model_name, model):
             curcshft.long(),
             cursdshft.long(),
             curqdshft.long(),
+        )
+    elif model_name == "dimkt_cc":
+        ccsd = cursd
+        y = model(
+            ccc.long(),
+            ccsd.long(),
+            ccr.long(),
+            curcshft.long(),
+            cursdshft.long(),
         )
 
     pred = y[:, -1].tolist()
@@ -74,6 +87,9 @@ def eval_kcs_one_user(
             csd = torch.tensor(seq_sds).to(DEVICE)
             cqd = torch.tensor(seq_qds).to(DEVICE)
 
+        if model_name == "dimkt_cc":
+            csd = torch.tensor(seq_sds).to(DEVICE)
+
         unique_cc = list(set(cc.tolist()))
         results = []
 
@@ -82,7 +98,7 @@ def eval_kcs_one_user(
                 continue
 
             index = int((cc == concept).nonzero(as_tuple=True)[-1][-1])
-            start = max(0, index - 200)
+            start = max(0, index - 300)
 
             dcur = {
                 "curc": cc[start:index].unsqueeze(dim=0),
@@ -98,6 +114,10 @@ def eval_kcs_one_user(
                 dcur["curqd"] = cqd[start:index].unsqueeze(dim=0)
                 dcur["cursdshft"] = csd[start + 1 : index + 1].unsqueeze(dim=0)
                 dcur["curqdshft"] = cqd[start + 1 : index + 1].unsqueeze(dim=0)
+
+            if model_name == "dimkt_cc":
+                dcur["cursd"] = csd[start:index].unsqueeze(dim=0)
+                dcur["cursdshft"] = csd[start + 1 : index + 1].unsqueeze(dim=0)
 
             pred = predict_each_kc(dcur, model_name, model)
 
@@ -127,7 +147,7 @@ def eval_kcs(model, data_config, testf, model_name, save_path=""):
         rs = [item if item != "-1" else "0" for item in responses]
         responses = rs
 
-        if model_name == "dimkt":
+        if model_name in ["dimkt", "dimkt_cc"]:
             sds = {}
             qds = {}
             with open(
@@ -183,13 +203,13 @@ def eval_kcs(model, data_config, testf, model_name, save_path=""):
         uid = row["uid"]
 
         results = eval_kcs_one_user(
-            model,
-            concepts,
-            responses,
-            questions,
-            model_name,
-            seq_sds,
-            seq_qds,
+            model=model,
+            concepts=concepts,
+            responses=responses,
+            model_name=model_name,
+            questions=questions,
+            seq_sds=seq_sds,
+            seq_qds=seq_qds,
         )
 
         pred_concepts = []

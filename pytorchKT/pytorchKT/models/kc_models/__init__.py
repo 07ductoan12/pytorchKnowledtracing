@@ -6,6 +6,7 @@ from .dkt_plus import DKTPlus
 from ._dimkt import DIMKT_CC
 from .deep_IRT import DeepIRT
 from .hawkes import HawkesKT
+from .skvmn import SKVMN
 
 __all__ = [
     "DKT",
@@ -16,4 +17,5 @@ __all__ = [
     "DIMKT_CC",
     "DeepIRT",
     "HawkesKT",
+    "SKVMN",
 ]

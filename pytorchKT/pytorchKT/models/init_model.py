@@ -10,6 +10,7 @@ from pytorchKT.models.kc_models import (
     DIMKT_CC,
     DeepIRT,
     HawkesKT,
+    SKVMN,
 )
 
 DEVICE = "cpu" if not torch.cuda.is_available() else "cuda"
@@ -48,6 +49,13 @@ def init_model(model_name, model_config, data_config, emb_type) -> torch.nn.Modu
         ).to(DEVICE)
     elif model_name == "dkvmn":
         model = DKVMN(
+            data_config["num_c"],
+            dim_s=model_config["dim_s"],
+            size_m=model_config["size_m"],
+            emb_type=emb_type,
+        ).to(DEVICE)
+    elif model_name == "skvmn":
+        model = SKVMN(
             data_config["num_c"],
             dim_s=model_config["dim_s"],
             size_m=model_config["size_m"],

@@ -19,9 +19,6 @@ def eval():
         params["train_ratio"],
     )
 
-    # save_dir = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/saved_model/train_dkvmn_assist2009_qid_saved_model_42_0_0.2_0.001_128_64"
-    save_dir = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/saved_model/train_dimkt_assist2009_qid_saved_model_42_0_0.2_0.001_256_64_199_100"
-
     with open(os.path.join(save_dir, "config.json"), encoding="utf-8") as fin:
         config = json.load(fin)
         model_config = copy.deepcopy(config["model_config"])

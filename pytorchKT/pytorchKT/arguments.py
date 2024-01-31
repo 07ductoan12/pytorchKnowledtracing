@@ -31,13 +31,14 @@ def get_train_arguments():
             "dimkt_cc",
             "deep_irt",
             "hawkes",
+            "skvmn",
         ],
     )
     parser.add_argument(
         "--dataset_name",
         type=str,
         default="assist2009",
-        choices=["assist2015", "assist2009", "ednet", "junyi"],
+        choices=["assist2015", "assist2009", "ednet", "junyi", "azota"],
     )
     parser.add_argument("--emb_type", type=str, default="qid")
     parser.add_argument("--save_dir", type=str, default="saved_model")
@@ -53,7 +54,7 @@ def get_train_arguments():
         parser.add_argument("--difficult_levels", type=int, default=100)
     elif model_name == "dkt":
         parser.add_argument("--emb_size", type=int, default=200)
-    elif model_name == "dkvmn":
+    elif model_name == "dkvmn" or model_name == "skvmn":
         parser.add_argument("--dim_s", type=int, default=200)
         parser.add_argument("--size_m", type=int, default=50)
     elif model_name == "dkt+":

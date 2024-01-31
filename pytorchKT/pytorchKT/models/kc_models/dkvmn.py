@@ -37,6 +37,10 @@ class DKVMN(Module):
         self.a_layer = Linear(self.dim_s, self.dim_s)
 
     def forward(self, q, r, qtest=False):
+        memory_matrix_list = []
+        weights_list = []
+        attentions_list = []
+
         emb_type = self.emb_type
         batch_size = q.shape[0]
         if emb_type == "qid":
@@ -61,6 +65,9 @@ class DKVMN(Module):
                 wt.unsqueeze(-1) * at.unsqueeze(1)
             )
             Mv.append(Mvt)
+            memory_matrix_list.append(Mvt)
+            weights_list.append(wt.unsqueeze(-1))
+            attentions_list.append(at.unsqueeze(1))
 
         Mv = torch.stack(Mv, dim=1)
 
@@ -76,4 +83,4 @@ class DKVMN(Module):
 
         if not qtest:
             return p
-        return p, f
+        return p, f, memory_matrix_list, weights_list, attentions_list

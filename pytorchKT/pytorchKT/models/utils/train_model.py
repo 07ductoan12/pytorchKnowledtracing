@@ -20,13 +20,7 @@ def cal_loss(model, ys, r, rshft, sm, preloss=[]):
         t = torch.masked_select(rshft, sm)
 
         loss = binary_cross_entropy(y.double(), t.double())
-    elif model_name in [
-        "sakt",
-        "dkvmn",
-        "dimkt",
-        "dimkt_cc",
-        "deep_irt",
-    ]:
+    elif model_name in ["sakt", "dkvmn", "dimkt", "dimkt_cc", "deep_irt", "skvmn"]:
         y = torch.masked_select(ys[0], sm)
         t = torch.masked_select(rshft, sm)
         loss = binary_cross_entropy(y.double(), t.double())
@@ -112,7 +106,7 @@ def model_forward(model: nn.Module, data, rel=None):
     elif model_name in ["sakt"]:
         y = model(c.long(), r.long(), cshft.long())
         ys.append(y)
-    elif model_name in ["dkvmn", "deep_irt"]:
+    elif model_name in ["dkvmn", "deep_irt", "skvmn"]:
         y = model(cc.long(), cr.long())
         ys.append(y[:, 1:])
     elif model_name in ["dimkt"]:

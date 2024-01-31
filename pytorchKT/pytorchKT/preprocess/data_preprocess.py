@@ -8,8 +8,9 @@ dname2paths = {
     "assist2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/ASSISTments2015/2015_100_skill_builders_main_problems.csv",
     "ednet": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/EdNet",
     "junyi2015": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/datasets/Junyi/junyi_ProblemLog_original.csv",
+    "azota": "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/datasets/Azota/ai_kt.csv",
 }
-config = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT-2/pytorchKT/configs/data_config.json"
+config = "/home/toan/d/Azota/pytorchKnowledtracing/pytorchKT/pytorchKT/configs/data_config.json"
 
 
 def process_raw_data(dataset_name, dname2paths):
@@ -25,6 +26,8 @@ def process_raw_data(dataset_name, dname2paths):
         from ednet_preprocess import read_data_from_csv
     elif dataset_name == "junyi2015":
         from junyi2015_preprocess import read_data_from_csv, load_q2c
+    elif dataset_name == "azota":
+        from azota_preprocess import read_data_from_csv
 
     # metap = os.path.join(dname, "metadata")
     if dataset_name in ["ednet", "ednet5w"]:
@@ -43,10 +46,10 @@ def process_raw_data(dataset_name, dname2paths):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dataset_name", type=str, default="assist2009")
+    parser.add_argument("-d", "--dataset_name", type=str, default="azota")
     parser.add_argument("-m", "--min_seq_len", type=int, default=3)
-    parser.add_argument("-l", "--maxlen", type=int, default=200)
-    parser.add_argument("-k", "--kfold", type=int, default=5)
+    parser.add_argument("-l", "--maxlen", type=int, default=300)
+    parser.add_argument("-k", "--kfold", type=int, default=6)
     # parser.add_argument("--mode", type=str, default="concept",help="question or concept")
     args = parser.parse_args()
 
